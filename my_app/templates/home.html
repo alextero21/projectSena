@@ -9,11 +9,12 @@
 
   {% if content %}
 
-    {% for elementos in content %}
+    {% for e in content %}
 
-    <span>Texto: {{elementos.texto}}</span>
+    <span>Texto: {{e.texto}}</span>
     <br>
-    <span>href: {{elementos.href}}</span>
+
+    <a href={{'getUrl'}}{{e.href}}>Link</a>
     <hr>
 
     {% endfor %}

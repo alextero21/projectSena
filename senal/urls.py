@@ -22,6 +22,7 @@ from my_app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', views.login, name='login'),
-    path('home', views.verify, name='home')
+    path('home', views.verify, name='home'),
+    path('getUrl/<str:href>', views.get_cookies, name='getUrl')
 
 ]
