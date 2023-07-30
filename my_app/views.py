@@ -1,12 +1,11 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
 from bs4 import BeautifulSoup
-from django.utils.http import urlencode
+from django.http import HttpResponse
 
 # Ruta al controlador ChromeDriver
 chrome_driver_path = 'C:\dchrome\chromedriver.exe'  # (o .exe en Windows)
@@ -59,17 +58,19 @@ def verify(request):
     contenido_class = [{'url':url,'texto': elemento.get_text(), 'href': elemento.get('href').replace('?', '%3F').replace('=', '%3D')} for elemento in elementos_con_clase]
 
 
-    # driver.get_cookies()
-
+    # Obtener la cookie del driver
+    mi_cookie = driver.get_cookies()
+    driver.quit()
     # cookies.quit()
 
     # driver2= webdriver.Chrome()
 
     # for cookie in cookies:
     #     driver2.add_cookie(cookie)
+    response = render(request, 'home.html', {'content': contenido_class})
+    response.set_cookie('cookie2', mi_cookie)
 
-
-    return render(request, 'home.html',{'content':contenido_class})
+    return response
 
     
         # else:
@@ -82,5 +83,5 @@ def get_cookies(request,href):
 
     # return render(request, 'home.html')
    
-    print(href)
-    return render(request, 'test.html')
+
+    return render(request, 'test.html',{'url':href})
