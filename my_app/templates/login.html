@@ -20,7 +20,7 @@
 <!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="{% static 'css/util.css' %}">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
 <!--===============================================================================================-->
 </head>
@@ -82,6 +82,7 @@
 		</div>
 	</div>
 	
+	<button>IR A PAGINA</button>
 	
 
 	
@@ -98,6 +99,59 @@
 		$('.js-tilt').tilt({
 			scale: 1.1
 		})
+
+		// Función para enviar la solicitud AJAX al "sitio web 2"
+		
+
+		function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+
+    // Obtener el valor del token CSRF de la cookie
+    var csrftoken = getCookie('csrftoken');
+
+		function activarSitioWeb2() {
+        var sitioWeb2URL = 'onDriver';
+
+        // Datos a enviar en la solicitud POST
+				var csrfToken = $('[name=csrfmiddlewaretoken]').val();
+
+				// Datos que deseas enviar en la solicitud POST
+				var postData = {
+						user: 1234192477,
+						pass: 'Colgate123456',
+						// No es necesario agregar el token CSRF al objeto de datos
+						// Lo agregaremos en la cabecera de la solicitud AJAX
+				};
+        // Enviar la solicitud AJAX con el token CSRF en la cabecera
+        $.ajax({
+					url: sitioWeb2URL,
+					type: 'POST',
+					data: postData,
+					dataType: 'json', // Opcional, dependiendo del tipo de respuesta esperado
+					beforeSend: function(xhr) {
+							// Agregar el token CSRF a la cabecera de la solicitud
+							xhr.setRequestHeader('X-CSRFToken', csrfToken);
+					},
+					success: function(data) {
+							// Callback function para manejar la respuesta del servidor
+							// data contiene la respuesta del servidor
+							console.log(data)
+					},
+					error: function(e) {
+							// Función que se ejecuta si la solicitud falla
+							console.log(e)
+					}
+			  });
+    }
+
+		$(document).ready(function() {
+      activarSitioWeb2();
+			
+  	});
+           		
 	</script>
 <!--===============================================================================================-->
 	<script src="{% static 'js/main.js' %}"></script>

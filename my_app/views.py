@@ -5,22 +5,108 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
 from bs4 import BeautifulSoup
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
+from selenium.common.exceptions import WebDriverException
 
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
+global_driver = None
 # Ruta al controlador ChromeDriver
 chrome_driver_path = 'C:\dchrome\chromedriver.exe'  # (o .exe en Windows)
+
+
+
 import time
 
 
 
+def initialize_driver():
+    options = webdriver.ChromeOptions()
+    options.add_experimental_option("detach", True)
+    return webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
 
-# from django.http import HttpResponse
 
-# Create your views here.
+
+
+
 def login(request):
-    # return render(request, 'login.html')
+
     return render(request, 'login.html')
-    # return HttpResponse('<h1>Hello world</h1>')
+
+def is_driver_active(driver):
+    try:
+        # Verificar si el controlador tiene una instancia válida
+        if driver and driver.title:
+            # Verificar si el navegador tiene una ventana abierta
+            return True
+    except WebDriverException:
+        pass
+    return False
+
+@csrf_protect
+def activateDriver(request):
+    global global_driver
+    url = 'https://sena.territorio.la/'
+    # Comprobar si el controlador está activo
+    if global_driver and is_driver_active(global_driver):
+        # Continuar interactuando con el navegador ya abierto
+        user = request.POST.get('user')
+        password = request.POST.get('pass')
+        global_driver.get(url + 'index.php?login=true')
+        wait = WebDriverWait(global_driver, 10)
+        usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
+        contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
+        usuario.send_keys(user)
+        contrasena.send_keys(password)
+        
+        contrasena.send_keys(Keys.ENTER)
+     
+
+
+            # clave = global_driver.find_element("id","passwd")
+            # clave.send_keys(password)
+            # clave.send_keys(Keys.ENTER)
+            
+            # global_driver.get(url+'init.php')
+            # alert = Alert(global_driver)
+            # time.sleep(0.6)
+            # alert.accept()
+          
+
+            # elemento = driver.find_element(By.XPATH, '//*[@id="catalogo-main-content"]')
+
+        return HttpResponse("Navegador ya abierto y controlador disponible.")
+    else:
+        # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
+        global_driver = initialize_driver()
+        global_driver.get(url + 'index.php?login=true')
+
+        # ... Resto de la lógica ...
+
+        return HttpResponse("Navegador abierto y controlador inicializado.")
+
+
+# def otraVista(request):
+#     driver = get_global_driver()
+
+#     if driver:
+#         # Si el controlador está disponible, continuar interactuando con el navegador ya abierto
+#         # Ejemplo: Obtener el contenido de una página y hacer clic en un elemento
+#         driver.get("URL_DE_OTRA_PAGINA_DEL_SITIO_WEB_2")
+#         elemento = driver.find_element(By.XPATH, "//*[@id='document']")
+#         elemento.click()
+
+#         # ... Resto de la lógica ...
+
+#         return HttpResponse("Continuando la interacción con el navegador ya abierto.")
+#     else:
+#         # Si el controlador no está inicializado, mostrar un mensaje de error
+#         return HttpResponse("El navegador no está abierto.")
+
 
 def verify(request):
     # if request.method == 'POST':

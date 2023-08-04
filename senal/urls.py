@@ -23,6 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', views.login, name='login'),
     path('home', views.verify, name='home'),
+    path('onDriver', views.activateDriver, name='onDriver'),
+    # path('viewo', views.otraVista, name='viewo'),
     path('getUrl/<str:href>', views.get_cookies, name='getUrl')
 
 ]
