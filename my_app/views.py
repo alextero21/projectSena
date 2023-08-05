@@ -58,26 +58,38 @@ def activateDriver(request):
         password = request.POST.get('pass')
         global_driver.get(url + 'index.php?login=true')
         wait = WebDriverWait(global_driver, 10)
-        usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
-        contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
-        usuario.send_keys(user)
-        contrasena.send_keys(password)
-        
-        contrasena.send_keys(Keys.ENTER)
-     
 
-
-            # clave = global_driver.find_element("id","passwd")
-            # clave.send_keys(password)
-            # clave.send_keys(Keys.ENTER)
+        if request.POST.get('pagina'):
+            contentSena= wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="catalogo-main-content"]')))
+            contenido_html = contentSena.get_attribute('innerHTML')
+            soup = BeautifulSoup(contenido_html, 'html.parser')
+            elementos_con_clase = soup.find_all(lambda tag: tag.has_attr('class') and 'letras1' in tag['class'])
+            contenido_class = [{'url':url,'texto': elemento.get_text(), 'href': elemento.get('href').replace('?', '%3F').replace('=', '%3D')} for elemento in elementos_con_clase]
+            print(contenido_class)
+            # global_driver.get(url + 'perfil.php?id=31247202')
+           
+            # enlace.click()
             
-            # global_driver.get(url+'init.php')
-            # alert = Alert(global_driver)
-            # time.sleep(0.6)
-            # alert.accept()
-          
+        else:
+            
+            usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
+            contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
+            usuario.send_keys(user)
+            contrasena.send_keys(password)
 
-            # elemento = driver.find_element(By.XPATH, '//*[@id="catalogo-main-content"]')
+            contrasena.send_keys(Keys.ENTER)
+
+        
+        # Acceder a los datos enviados en la solicitud POST
+            # key1_value = request.POST.get('pagina')
+
+
+            # contentSena= wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="catalogo-main-content"]')))
+            # contenido_html = contentSena.get_attribute('innerHTML')
+            
+            #https://sena.territorio.la/perfil.php?id=31247202
+
+
 
         return HttpResponse("Navegador ya abierto y controlador disponible.")
     else:
@@ -88,24 +100,6 @@ def activateDriver(request):
         # ... Resto de la lógica ...
 
         return HttpResponse("Navegador abierto y controlador inicializado.")
-
-
-# def otraVista(request):
-#     driver = get_global_driver()
-
-#     if driver:
-#         # Si el controlador está disponible, continuar interactuando con el navegador ya abierto
-#         # Ejemplo: Obtener el contenido de una página y hacer clic en un elemento
-#         driver.get("URL_DE_OTRA_PAGINA_DEL_SITIO_WEB_2")
-#         elemento = driver.find_element(By.XPATH, "//*[@id='document']")
-#         elemento.click()
-
-#         # ... Resto de la lógica ...
-
-#         return HttpResponse("Continuando la interacción con el navegador ya abierto.")
-#     else:
-#         # Si el controlador no está inicializado, mostrar un mensaje de error
-#         return HttpResponse("El navegador no está abierto.")
 
 
 def verify(request):

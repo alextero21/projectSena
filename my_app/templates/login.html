@@ -125,7 +125,37 @@
 						// No es necesario agregar el token CSRF al objeto de datos
 						// Lo agregaremos en la cabecera de la solicitud AJAX
 				};
+				
         // Enviar la solicitud AJAX con el token CSRF en la cabecera
+				$("button").click(function(){
+
+
+					$.ajax({
+						url: sitioWeb2URL,
+						type: 'POST',
+						data: {pagina:'senal'},
+						dataType: 'json', // Opcional, dependiendo del tipo de respuesta esperado
+						beforeSend: function(xhr) {
+								// Agregar el token CSRF a la cabecera de la solicitud
+								xhr.setRequestHeader('X-CSRFToken', csrfToken);
+						},
+						success: function(data) {
+								// Callback function para manejar la respuesta del servidor
+								// data contiene la respuesta del servidor
+								// console.log(data)
+						},
+						error: function(e) {
+								// Función que se ejecuta si la solicitud falla
+								console.log(e)
+						}
+					});
+
+
+					
+
+
+				});
+				//ESTE ES POR DEFECTO, PARA ABRIR AL INICIO EL NAVEGADOR
         $.ajax({
 					url: sitioWeb2URL,
 					type: 'POST',
