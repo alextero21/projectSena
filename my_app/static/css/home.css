@@ -1,0 +1,125 @@
+
+body{
+  background: rgb(249,248,255);
+  background: linear-gradient(90deg, rgba(249,248,255,1) 0%, rgba(237,237,237,1) 100%);
+}
+
+.decoration_card{
+  background: rgb(0,19,140);
+  background: linear-gradient(90deg, rgba(0,19,140,1) 0%, rgba(0,4,43,1) 100%);
+  color:#F9F9F9;
+}
+
+.decoration_card a{
+  text-decoration : none;
+}
+
+
+
+#containt{
+  background-color:gray;
+  
+  
+}
+
+#slider-main{
+  /* text-align: center; */
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  /* align-items: center;  */
+
+  background-color: rgb(230, 230, 230);
+
+}
+
+
+
+/* Estilos para el contenedor del slider */
+.slider-container {
+  width: 700px; /* Ancho del slider */
+  overflow: hidden;
+  position: relative; /* Asegúrate de establecer la posición en relativo para que los botones de flecha se posicionen correctamente */
+  background-color: #f0f0f0; /* Color de fondo para el contenedor del slider */
+  padding: 20px; /* Espaciado interno para el contenedor del slider */
+  border-radius: 20px;
+}
+
+/* Estilos para el slider */
+.slider {
+  display: flex;
+  /* Ajustar la dirección de los ítems a horizontal */
+  flex-direction: row;
+  /* Centrar horizontalmente los íconos */
+  justify-content: center;
+  /* Eliminar el salto de línea entre los íconos */
+  white-space: nowrap;
+  /* Reiniciar la animación */
+  animation: none;
+  /* Ajustar el tamaño del slider al tamaño de los íconos */
+  width: fit-content;
+  /* Centrar el slider horizontalmente */
+  margin: 0 auto;
+
+}
+
+/* Estilos para los iconos dentro del slider */
+.icon {
+  margin: -15px 10px; /* Espaciado entre iconos */
+  /* Ajustar el tamaño de los iconos si es necesario */
+  font-size: 24px;
+}
+
+.icon a span{
+  font-size: 40px;
+}
+
+
+
+/* Estilos para las flechas */
+.prev-btn,
+.next-btn {
+  
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #f0f0f0; /* Color de fondo para los botones de flecha  */
+  padding: 10px; /* Espaciado interno para los botones de flecha */
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1;
+  color: #f0f0f0;
+  display: none;
+  
+
+  
+}
+
+.prev-btn {
+  left: -10px; /* Flecha al extremo izquierdo */
+  
+  
+  
+}
+
+.next-btn {
+  
+  right: -10px; /* Flecha al extremo derecho */
+}
+
+/* Estilos adicionales para el contenedor del slider */
+.slider-container {
+  /* Establecer una altura fija para que los íconos no se desplacen verticalmente */
+  height: 50px;
+}
+
+/* Resto de los estilos permanecen iguales */
+
+
+@media only screen and (max-width: 700px) {
+  .prev-btn,
+  .next-btn {
+    background-color: #2f3caa;
+    color: #e4e4e4;
+  }
+}

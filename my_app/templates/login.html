@@ -33,7 +33,8 @@
 					<img src="{% static 'images/img-01.png' %}" alt="IMG">
 				</div>
 
-				<form class="login100-form validate-form" id="login-form" method="post" action="{% url 'home' %}">
+				<!-- method="post" action="{% url 'home' %}" -->
+				<form class="login100-form validate-form" id="login-form" >
 					{% csrf_token %}
 					<span class="login100-form-title">
 						Territorium SENA
@@ -41,7 +42,7 @@
 					</span>
 
 					<div class="wrap-input100 validate-input">
-						<input class="input100" type="number" name="identification" placeholder="Number">
+						<input class="input100" id="identification" type="number" name="identification" placeholder="Number">
 						<span class="focus-input100"></span>
 						<span class="symbol-input100">
 							<i class="fa fa-envelope" aria-hidden="true"></i>
@@ -49,7 +50,7 @@
 					</div>
 
 					<div class="wrap-input100 validate-input" data-validate = "Password is required">
-						<input class="input100" type="password" name="pass" placeholder="Password">
+						<input class="input100" id="pass" type="password" name="pass" placeholder="Password">
 						<span class="focus-input100"></span>
 						<span class="symbol-input100">
 							<i class="fa fa-lock" aria-hidden="true"></i>
@@ -57,7 +58,7 @@
 					</div>
 					
 					<div class="container-login100-form-btn">
-						<button class="login100-form-btn">
+						<button class="login100-form-btn" id="btnSubmitLogin" type="submit">
 							Iniciar sesión
 						</button>
 					</div>
@@ -82,7 +83,7 @@
 		</div>
 	</div>
 	
-	<button>IR A PAGINA</button>
+
 	
 
 	
@@ -127,34 +128,49 @@
 				};
 				
         // Enviar la solicitud AJAX con el token CSRF en la cabecera
-				$("button").click(function(){
+				
+
+				$('#login-form').submit(function(event) {
+						// $("button").click(function(){
+						// Evitar que el formulario se envíe de forma tradicional
+						event.preventDefault();
+
+						// Obtener los datos del formulario
+						var identification = $('#identification').val();
+						var pass = $('#pass').val();
+		
+
+						// Crear un objeto con los datos a enviar en el POST
+						var datos = {
+							username: identification,
+							password: pass
+						};
 
 
-					$.ajax({
-						url: sitioWeb2URL,
-						type: 'POST',
-						data: {pagina:'senal'},
-						dataType: 'json', // Opcional, dependiendo del tipo de respuesta esperado
-						beforeSend: function(xhr) {
-								// Agregar el token CSRF a la cabecera de la solicitud
-								xhr.setRequestHeader('X-CSRFToken', csrfToken);
-						},
-						success: function(data) {
-								// Callback function para manejar la respuesta del servidor
-								// data contiene la respuesta del servidor
-								// console.log(data)
-						},
-						error: function(e) {
-								// Función que se ejecuta si la solicitud falla
-								console.log(e)
-						}
+						$.ajax({
+							url: sitioWeb2URL,
+							type: 'POST',
+							data: datos,
+							dataType: 'json', // Opcional, dependiendo del tipo de respuesta esperado
+							beforeSend: function(xhr) {
+									// Agregar el token CSRF a la cabecera de la solicitud
+									xhr.setRequestHeader('X-CSRFToken', csrfToken);
+							},
+							success: function(data) {
+									// Callback function para manejar la respuesta del servidor
+							
+									var redirectUrl = data.url;
+									window.location.href = redirectUrl;
+							},
+							error: function(xhr, textStatus, errorThrown) {
+									// Función que se ejecuta si la solicitud falla
+									console.log('Error en la petición:', textStatus);
+							}
+						});
+
 					});
 
 
-					
-
-
-				});
 				//ESTE ES POR DEFECTO, PARA ABRIR AL INICIO EL NAVEGADOR
         $.ajax({
 					url: sitioWeb2URL,
@@ -170,11 +186,13 @@
 							// data contiene la respuesta del servidor
 							console.log(data)
 					},
-					error: function(e) {
+					error: function(xhr, textStatus, errorThrown) {
 							// Función que se ejecuta si la solicitud falla
-							console.log(e)
+							console.log(errorThrown)
 					}
 			  });
+
+
     }
 
 		$(document).ready(function() {

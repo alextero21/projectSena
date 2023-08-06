@@ -11,37 +11,7 @@
   <!-- Tu contenido HTML actual aquí -->
 
 <!-- Agregar el script con la redirección y la cookie -->
-<script>
-  // Obtener el valor de la cookie
-  var miCookie = getCookie('cookie2');
 
-  // Hacer lo que necesites con el valor de la cookie
-  // Por ejemplo, mostrarlo en una alerta:
-  alert('El valor de la cookie es: ' + miCookie);
-
-  // Función para obtener el valor de una cookie por su nombre
-  function getCookie(name) {
-      var value = "; " + document.cookie;
-      var parts = value.split("; " + name + "=");
-      if (parts.length == 2) return parts.pop().split(";").shift();
-  }
-  var url = "https://sena.territorio.la/{{ url }}";
-  // Redirigir hacia la página del "sitio web 2" junto con la cookie
-  function redirigir() {
-      // Obtener la URL de la página del "sitio web 2"
-
-      // Agregar el valor de la cookie a la URL de redirección
-      if (miCookie) {
-        url += '?cookie=' + encodeURIComponent(miCookie);
-      }
-
-      // Redirigir al usuario a la página del "sitio web 2" con la cookie
-      window.location.href = url;
-  }
-
-  // Llamar a la función de redirección cuando sea necesario
-  redirigir();
-</script>
 
 </body>
 </html>
