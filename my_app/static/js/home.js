@@ -44,3 +44,85 @@ updateSliderPosition();
 });
 // Puedes agregar funciones para hacer el slider automático si lo deseas
 // por ejemplo, utilizando setInterval para llamar a nextSlide automáticamente cada cierto tiempo.
+
+
+
+
+
+
+
+var uni = 1256;
+//var cmp = 1;
+var pers = 26182335;
+
+
+
+var urlSearch = "/webservices/academico.php";
+var mainContent = "catalogo-main-content";
+var method = "obtenerMateriasConPaginacion";
+var totalPages = 0;
+var rangePages = 20;
+var limitSearch = 100;
+var idUniversidad = "1256";
+var idPersona = "26182335";
+//grupos donde esta inscrito 
+var valueTab = 5;
+
+$(document).ready(function () {
+
+
+//   form = formSerialize();
+//   page = (page) ? page : 1;
+//   dataAjax = form + "&limit=" + limitSearch + "&offset=" + page;
+//   form.limit = limitSearch;
+//   form.offset = page;
+//   var dataSend = 'method=' + method + '&param=' + JSON.stringify(form);
+  
+//   $.ajax({
+//     type: "POST",
+//     url: urlSearch,
+//     dataType: "json",
+//     data: dataSend,
+//     success: function(data) {
+//      console.log(data);
+//     },
+//     error: function(xhr, textStatus, errorThrown) {
+//         console.log("Error:", xhr);
+//     }
+// });
+
+
+function sendAjax(){
+  idgrupo=31247202
+  dataAjax = "methodclave=registroclave&idgrupo="+idgrupo;
+  //alert(dataAjax);
+  $.ajax({
+                    type:'POST',
+                    url:'https://sena.territorio.la/webservices/grupo.php',
+                    data: dataAjax,
+                    cache: false,
+                    success:function(response) {
+  
+                       // console.log(response);
+                        //alert(response);
+  
+                        console.log(response);
+                    },
+                    error: function(xhr) {
+                      //alert('error');
+                    }
+    });
+}
+
+$('#presiona').click(function (e) { 
+  e.preventDefault();
+  sendAjax()
+});
+
+
+
+
+
+
+
+});

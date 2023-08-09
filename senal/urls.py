@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', views.login, name='login'),
     path('home', views.home, name='home'),
+    path('proxy_view', views.proxy_view, name='proxy_view'),
     path('onDriver', views.activateDriver, name='onDriver'),
     # path('viewo', views.otraVista, name='viewo'),
     path('getUrl/<str:href>', views.get_url, name='getUrl')

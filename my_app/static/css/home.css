@@ -1,7 +1,16 @@
 
 body{
-  background: rgb(249,248,255);
+  background: rgb(48, 18, 218);
   background: linear-gradient(90deg, rgba(249,248,255,1) 0%, rgba(237,237,237,1) 100%);
+  font-family: 'Jost', sans-serif;;
+}
+
+#containt{
+  background-color: rgb(230, 230, 230);
+}
+
+.navbar-brand{
+  color: #f0f0f0;
 }
 
 .decoration_card{
@@ -14,13 +23,12 @@ body{
   text-decoration : none;
 }
 
-
-
-#containt{
-  background-color:gray;
-  
-  
+.card-body h5{
+  color: #ffffff;
 }
+
+
+
 
 #slider-main{
   /* text-align: center; */
@@ -36,7 +44,7 @@ body{
 
 /* Estilos para el contenedor del slider */
 .slider-container {
-  width: 700px; /* Ancho del slider */
+  width: 600px; /* Ancho del slider */
   overflow: hidden;
   position: relative; /* Asegúrate de establecer la posición en relativo para que los botones de flecha se posicionen correctamente */
   background-color: #f0f0f0; /* Color de fondo para el contenedor del slider */
@@ -112,6 +120,16 @@ body{
   /* Establecer una altura fija para que los íconos no se desplacen verticalmente */
   height: 50px;
 }
+
+.card.decoration_card {
+  float: left; /* Alinea las tarjetas en línea horizontal */
+  margin-right: 10px; /* Espacio entre las tarjetas */
+}
+
+.card.decoration_card:last-child {
+  margin-right: 0; /* Elimina el espacio derecho de la última tarjeta */
+}
+
 
 /* Resto de los estilos permanecen iguales */
 

@@ -10,7 +10,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
 from selenium.common.exceptions import WebDriverException
-
+import requests
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -74,7 +74,10 @@ def activateDriver(request):
                 usuario.send_keys(user)
                 contrasena.send_keys(password)
 
-                contrasena.send_keys(Keys.ENTER)                            
+                contrasena.send_keys(Keys.ENTER)              
+
+                
+
            
                 return JsonResponse({'status':200, 'message':'Éxito','url':'home'})
 
@@ -117,6 +120,8 @@ def home(request):
         elementos_con_clase = soup.find_all(lambda tag: tag.has_attr('class') and 'letras1' in tag['class'])
         contenido_class = [{'url':url,'texto': elemento.get_text(), 'href': elemento.get('href').replace('?', '%3F').replace('=', '%3D')} for elemento in elementos_con_clase]
 
+        
+
 
         return render(request, 'home.html',{'content':contenido_class})
 
@@ -137,4 +142,38 @@ def get_url(request,href):
     else:
       return JsonResponse({'status':404, 'message':'Error en el navegador','url':'home'})
 
+def proxy_view(request):
+    # Obtener los datos enviados en la solicitud AJAX
+
+    data = "methodclave=registroclave&idgrupo=31247202"
+
+    referer = request.META.get('HTTP_REFERER', '')
+
+    # Configurar las cabeceras necesarias para la solicitud al servidor remoto
+    headers = {
+        'User-Agent': request.META.get('HTTP_USER_AGENT', ''),
+        'Referer': referer,
+        # ... otras cabeceras ...
+    }
+
+    response = requests.post('https://sena.territorio.la/webservices/grupo.php', data=data, headers=headers)
+
+    try:
+        json_data = response.json()
+        proxy_response = JsonResponse(json_data, status=response.status_code)
+    except requests.exceptions.JSONDecodeError as e:
+        print("Error decoding JSON:", e)
+        error_message = {'error': 'Error al decodificar JSON en la respuesta'}
+        proxy_response = JsonResponse(error_message, status=500)
+
+
+    proxy_response['Access-Control-Allow-Origin'] = '*'  # Permitir todas las solicitudes (cambiar según tus necesidades)
+
+    print(proxy_response)
+
+    return proxy_response
     
+#https://sena.territorio.la/perfil.php?id=31247202
+#https://sena.territorio.la/tareas.php?clase=2776992
+#https://sena.territorio.la/init.php?muro=1  clpost.php
+#https://sena.territorio.la/tarea_tt.php?tarea=480296055 dependiendo de la tarea
