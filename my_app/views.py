@@ -72,8 +72,8 @@ def activateDriver(request):#ESTE NOOOOO
 
                 usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
                 contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
-                usuario.send_keys(1234192477)
-                contrasena.send_keys('Colgate123456')
+                usuario.send_keys(user)
+                contrasena.send_keys(password)
 
                 contrasena.send_keys(Keys.ENTER)              
 
@@ -144,7 +144,8 @@ def testing(request):
     # if global_driver and is_driver_active(global_driver):
 
     if global_driver and is_driver_active(global_driver):
-  
+        # AQUI COMIENZA EL MURO
+
         global_driver.get(url+'init.php?muro=1')
 
         num_elementos_anteriores = 0
@@ -158,11 +159,9 @@ def testing(request):
                 WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link), posts)
                 ver_mas_link.click()
 
-
                 time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
                 num_elementos_anteriores = num_elementos_actuales
                 num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
-                print('Total numeros: '+num_elementos_anteriores)
 
                 # Obtener y mostrar el contenido de los elementos "post"
                 post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
@@ -186,7 +185,7 @@ def testing(request):
                             tarea_param = parse_qs(parsed_url_boton.query).get("tarea")
                             
                             if grupo_param and grupo_param[0] == "2776992" and tarea_param:
-                                print("Elemento con grupo 2776992 y tarea:", tarea_param)
+                                print("Elemento con grupo 2776992 y tarea:", post_element.text)
 
 
             except:
@@ -197,6 +196,9 @@ def testing(request):
 
 
         return JsonResponse({'status': 200, 'message': 'ABIERTO EL CONTROLADOR Y OBTENIDOS TODOS LOS POST'})
+
+      
+            
 
     else:
         # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
@@ -210,21 +212,16 @@ def testing(request):
         usuario.send_keys(1234192477)
         contrasena.send_keys('Colgate123456')
 
-        contrasena.send_keys(Keys.ENTER) 
-        return JsonResponse({'status': 200, 'message': 'YA ABRIO EL LOGIN'})
+        contrasena.send_keys(Keys.ENTER)     
     
-
-       
+        return JsonResponse({'status':200, 'message':'Abriendo controlador'})
     
 
 def getContent(request):
 
     global global_driver
 
-    test=True
-
-    # if global_driver and is_driver_active(global_driver):
-    if test:
+    if global_driver and is_driver_active(global_driver):
             
         global_driver.get(url+'init.php?muro=1')
 
@@ -239,11 +236,9 @@ def getContent(request):
                 WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link), posts)
                 ver_mas_link.click()
 
-
                 time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
                 num_elementos_anteriores = num_elementos_actuales
                 num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
-                print('Total numeros: '+num_elementos_anteriores)
 
                 # Obtener y mostrar el contenido de los elementos "post"
                 post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
@@ -267,7 +262,7 @@ def getContent(request):
                             tarea_param = parse_qs(parsed_url_boton.query).get("tarea")
                             
                             if grupo_param and grupo_param[0] == "2776992" and tarea_param:
-                                print("Elemento con grupo 2776992 y tarea:", tarea_param)
+                                print("Elemento con grupo 2776992 y tarea:", post_element.text)
 
 
             except:
@@ -281,8 +276,8 @@ def getContent(request):
 
     else:
             # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
-            global_driver = initialize_driver()
-            global_driver.get(url+'init.php?muro=1')
+            # global_driver = initialize_driver()
+            # global_driver.get(url+'init.php?muro=1')
 
             return JsonResponse({'status': 400, 'message': 'ERROR'})
 
