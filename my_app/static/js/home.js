@@ -90,35 +90,26 @@ $(document).ready(function () {
 //         console.log("Error:", xhr);
 //     }
 // });
-
-
-function sendAjax(){
-  idgrupo=31247202
-  dataAjax = "methodclave=registroclave&idgrupo="+idgrupo;
-  //alert(dataAjax);
-  $.ajax({
-                    type:'POST',
-                    url:'https://sena.territorio.la/webservices/grupo.php',
-                    data: dataAjax,
-                    cache: false,
-                    success:function(response) {
-  
-                       // console.log(response);
-                        //alert(response);
-  
-                        console.log(response);
-                    },
-                    error: function(xhr) {
-                      //alert('error');
-                    }
-    });
-}
-
-$('#presiona').click(function (e) { 
-  e.preventDefault();
-  sendAjax()
+var csrfToken = $('[name=csrfmiddlewaretoken]').val();
+$.ajax({
+  url: '/getPosts',
+  type: 'POST',
+  data: {pagina:'ejemplo'},
+  dataType: 'json', // Opcional, dependiendo del tipo de respuesta esperado
+  beforeSend: function(xhr) {
+      // Agregar el token CSRF a la cabecera de la solicitud
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+  },
+  success: function(data) {
+      // Callback function para manejar la respuesta del servidor
+      // data contiene la respuesta del servidor
+      console.log(data)
+  },
+  error: function(xhr, textStatus, errorThrown) {
+      // Función que se ejecuta si la solicitud falla
+      console.log(textStatus)
+  }
 });
-
 
 
 

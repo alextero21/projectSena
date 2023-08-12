@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
 from selenium.common.exceptions import WebDriverException
 import requests
-
+import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from django.http import JsonResponse
@@ -19,7 +19,7 @@ from django.http import JsonResponse
 global_driver = None
 url = 'https://sena.territorio.la/'
 # Ruta al controlador ChromeDriver
-chrome_driver_path = 'C:\dchrome\chromedriver.exe'  # (o .exe en Windows)
+# chrome_driver_path = 'C:\dchrome\chromedriver.exe'  # (o .exe en Windows)
 
 
 
@@ -51,7 +51,7 @@ def is_driver_active(driver):
     return False
 
 @csrf_protect
-def activateDriver(request):
+def activateDriver(request):#ESTE NOOOOO
     global global_driver
     
 
@@ -142,37 +142,89 @@ def get_url(request,href):
     else:
       return JsonResponse({'status':404, 'message':'Error en el navegador','url':'home'})
 
-def proxy_view(request):
+def testing(request):
     # Obtener los datos enviados en la solicitud AJAX
 
-    data = "methodclave=registroclave&idgrupo=31247202"
-
-    referer = request.META.get('HTTP_REFERER', '')
-
-    # Configurar las cabeceras necesarias para la solicitud al servidor remoto
-    headers = {
-        'User-Agent': request.META.get('HTTP_USER_AGENT', ''),
-        'Referer': referer,
-        # ... otras cabeceras ...
-    }
-
-    response = requests.post('https://sena.territorio.la/webservices/grupo.php', data=data, headers=headers)
-
-    try:
-        json_data = response.json()
-        proxy_response = JsonResponse(json_data, status=response.status_code)
-    except requests.exceptions.JSONDecodeError as e:
-        print("Error decoding JSON:", e)
-        error_message = {'error': 'Error al decodificar JSON en la respuesta'}
-        proxy_response = JsonResponse(error_message, status=500)
-
-
-    proxy_response['Access-Control-Allow-Origin'] = '*'  # Permitir todas las solicitudes (cambiar según tus necesidades)
-
-    print(proxy_response)
-
-    return proxy_response
     
+
+    return render(request, 'test.html')
+    
+    
+# Variable para mantener el estado de la interacción
+ver_mas_realizado = False
+
+def getTesting(request):
+    global global_driver
+
+    # Comprobar si el controlador está activo
+    if global_driver and is_driver_active(global_driver):
+        global_driver.get("http://localhost:8000/test#")
+
+        num_elementos_anteriores = 0
+        num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+
+        while num_elementos_actuales > num_elementos_anteriores:
+            ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
+            try:
+                # Esperar a que el elemento sea interactable antes de hacer clic en él
+                WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link))
+                ver_mas_link.click()
+
+                time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
+                num_elementos_anteriores = num_elementos_actuales
+                num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+            except:
+                # Si el elemento ya no es interactable, salir del bucle
+                break
+
+
+        print(num_elementos_actuales)
+        return JsonResponse({'status': 200, 'message': 'ABIERTO EL CONTROLADOR Y OBTENIDOS TODOS LOS POST'})
+
+    else:
+        # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
+        global_driver = initialize_driver()
+        global_driver.get("http://localhost:8000/test")
+
+        return JsonResponse({'status': 200, 'message': 'Abriendo controlador'})
+
+
+
+def getContent(request):
+
+    global global_driver
+
+    if global_driver and is_driver_active(global_driver):
+            
+        global_driver.get(url+'init.php?muro=1')
+        
+        
+
+      # Obtener el número de elementos del catálogo actuales
+        num_elementos_anteriores = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+
+        # Ejecutar la función verMas()
+        ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
+        ver_mas_link.click()
+
+        wait = WebDriverWait(global_driver, 10)
+        # Esperar a que los elementos anteriores se vuelvan obsoletos
+        wait.until(EC.staleness_of(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']")))
+
+        # Esperar hasta que se carguen nuevos elementos
+        wait.until(lambda driver: len(driver.find_elements(By.CSS_SELECTOR, "[id^='post']")) > num_elementos_anteriores)
+
+        # Realizar operaciones con los nuevos elementos del catálogo
+        nuevos_elementos = global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']")
+        for elemento in nuevos_elementos:
+            # Procesar los nuevos elementos como desees
+            pass
+
+    
+
+    return JsonResponse({'status':200, 'message':'Excelente','url':'test'})
+
+
 #https://sena.territorio.la/perfil.php?id=31247202
 #https://sena.territorio.la/tareas.php?clase=2776992
 #https://sena.territorio.la/init.php?muro=1  clpost.php

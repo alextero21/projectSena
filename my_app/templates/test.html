@@ -1,17 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  {% load static %}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   <title>Document</title>
 </head>
 <body>
-  TEST
+
+  <style>
+    .texto {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+}
+
+#verMas {
+  margin-top: 10px;
+}
+  </style>
+
+  PROBANDO ESTOSSS
+
+  <div id="contenedor">
+    <div id="post[45647755]">Contenido del div 1</div>
+    <div id="post[33444661]">Contenido del div 2</div>
+
+  </div>
+  <a href="#" id="verMas">Ver más</a>
 
   <!-- Tu contenido HTML actual aquí -->
 
 <!-- Agregar el script con la redirección y la cookie -->
-
+<script src="{% static 'js/test.js' %}"></script>
 
 </body>
 </html>
