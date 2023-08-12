@@ -26,8 +26,6 @@ urlpatterns = [
     path('test', views.testing, name='testing'),
     path('onDriver', views.activateDriver, name='onDriver'),
     path('getPosts', views.getContent, name='getContent'),
-    path('getTesting', views.getTesting, name='getTesting'),
-    # path('viewo', views.otraVista, name='viewo'),
     path('getUrl/<str:href>', views.get_url, name='getUrl')
 
 ]

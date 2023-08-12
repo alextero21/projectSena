@@ -71,25 +71,6 @@ var valueTab = 5;
 $(document).ready(function () {
 
 
-//   form = formSerialize();
-//   page = (page) ? page : 1;
-//   dataAjax = form + "&limit=" + limitSearch + "&offset=" + page;
-//   form.limit = limitSearch;
-//   form.offset = page;
-//   var dataSend = 'method=' + method + '&param=' + JSON.stringify(form);
-  
-//   $.ajax({
-//     type: "POST",
-//     url: urlSearch,
-//     dataType: "json",
-//     data: dataSend,
-//     success: function(data) {
-//      console.log(data);
-//     },
-//     error: function(xhr, textStatus, errorThrown) {
-//         console.log("Error:", xhr);
-//     }
-// });
 var csrfToken = $('[name=csrfmiddlewaretoken]').val();
 $.ajax({
   url: '/getPosts',

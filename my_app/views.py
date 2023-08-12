@@ -10,11 +10,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
 from selenium.common.exceptions import WebDriverException
-import requests
 import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from django.http import JsonResponse
+from urllib.parse import urlparse, parse_qs
 
 global_driver = None
 url = 'https://sena.territorio.la/'
@@ -54,12 +54,13 @@ def is_driver_active(driver):
 def activateDriver(request):#ESTE NOOOOO
     global global_driver
     
-
+   
     # Comprobar si el controlador está activo
     # if global_driver and is_driver_active(global_driver):
 
     if global_driver and is_driver_active(global_driver):
         # Continuar interactuando con el navegador ya abierto
+        print('ERROR 1')
         if request.method == 'POST':     
             user = int(request.POST.get('username'))
             password = request.POST.get('password')
@@ -88,6 +89,7 @@ def activateDriver(request):#ESTE NOOOOO
             
 
     else:
+        print('ERROR 2')
         # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
         global_driver = initialize_driver()
         global_driver.get(url + 'index.php?login=true')
@@ -99,13 +101,6 @@ def activateDriver(request):#ESTE NOOOOO
 
 
 def home(request):
-
-
-    
-    # driver.get(url+'init.php')
-    # alert = Alert(driver)
-    # time.sleep(0.6)
-    # alert.accept()
 
 
     global global_driver
@@ -149,46 +144,6 @@ def testing(request):
 
     return render(request, 'test.html')
     
-    
-# Variable para mantener el estado de la interacción
-ver_mas_realizado = False
-
-def getTesting(request):
-    global global_driver
-
-    # Comprobar si el controlador está activo
-    if global_driver and is_driver_active(global_driver):
-        global_driver.get("http://localhost:8000/test#")
-
-        num_elementos_anteriores = 0
-        num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
-
-        while num_elementos_actuales > num_elementos_anteriores:
-            ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
-            try:
-                # Esperar a que el elemento sea interactable antes de hacer clic en él
-                WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link))
-                ver_mas_link.click()
-
-                time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
-                num_elementos_anteriores = num_elementos_actuales
-                num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
-            except:
-                # Si el elemento ya no es interactable, salir del bucle
-                break
-
-
-        print(num_elementos_actuales)
-        return JsonResponse({'status': 200, 'message': 'ABIERTO EL CONTROLADOR Y OBTENIDOS TODOS LOS POST'})
-
-    else:
-        # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
-        global_driver = initialize_driver()
-        global_driver.get("http://localhost:8000/test")
-
-        return JsonResponse({'status': 200, 'message': 'Abriendo controlador'})
-
-
 
 def getContent(request):
 
@@ -197,32 +152,62 @@ def getContent(request):
     if global_driver and is_driver_active(global_driver):
             
         global_driver.get(url+'init.php?muro=1')
-        
-        
 
-      # Obtener el número de elementos del catálogo actuales
-        num_elementos_anteriores = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+        num_elementos_anteriores = 0
+        num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
 
-        # Ejecutar la función verMas()
-        ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
-        ver_mas_link.click()
+        while num_elementos_actuales > num_elementos_anteriores:
+            ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
+            posts = EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]"))
+            try:
+                # Esperar a que el elemento sea interactable antes de hacer clic en él
+                WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link), posts)
+                ver_mas_link.click()
 
-        wait = WebDriverWait(global_driver, 10)
-        # Esperar a que los elementos anteriores se vuelvan obsoletos
-        wait.until(EC.staleness_of(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']")))
+                time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
+                num_elementos_anteriores = num_elementos_actuales
+                num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
 
-        # Esperar hasta que se carguen nuevos elementos
-        wait.until(lambda driver: len(driver.find_elements(By.CSS_SELECTOR, "[id^='post']")) > num_elementos_anteriores)
+                # Obtener y mostrar el contenido de los elementos "post"
+                post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
+                for post_element in post_elements:
 
-        # Realizar operaciones con los nuevos elementos del catálogo
-        nuevos_elementos = global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']")
-        for elemento in nuevos_elementos:
-            # Procesar los nuevos elementos como desees
-            pass
+                    # Buscar las clases "nombres" dentro del elemento "post"
+                    nombres_elements = post_element.find_elements(By.CLASS_NAME, "nombres")
+                    for nombres_element in nombres_elements:
+                        href = nombres_element.get_attribute("href")
+                        parsed_url = urlparse(href)
+                        grupo_param = parse_qs(parsed_url.query).get("grupo")#tarea=483078840
 
-    
+                        # if grupo_param and grupo_param[0] == "2776992":
+                        #     print("Elemento con grupo 2776992:", post_element.text)
 
-    return JsonResponse({'status':200, 'message':'Excelente','url':'test'})
+                         # Buscar la clase "botonPersonalizadoBootstrap" dentro del elemento "post"
+                        boton_elements = post_element.find_elements(By.CLASS_NAME, "botonPersonalizadoBootstrap")
+                        for boton_element in boton_elements:
+                            href_boton = boton_element.get_attribute("href")
+                            parsed_url_boton = urlparse(href_boton)
+                            tarea_param = parse_qs(parsed_url_boton.query).get("tarea")
+                            
+                            if grupo_param and grupo_param[0] == "2776992" and tarea_param:
+                                print("Elemento con grupo 2776992 y tarea:", post_element.text)
+
+
+            except:
+                # Si el elemento ya no es interactable, salir del bucle
+                break
+
+        WebDriverWait(global_driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]")))
+
+
+        return JsonResponse({'status': 200, 'message': 'ABIERTO EL CONTROLADOR Y OBTENIDOS TODOS LOS POST'})
+
+    else:
+            # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
+            # global_driver = initialize_driver()
+            # global_driver.get(url+'init.php?muro=1')
+
+            return JsonResponse({'status': 400, 'message': 'ERROR'})
 
 
 #https://sena.territorio.la/perfil.php?id=31247202
