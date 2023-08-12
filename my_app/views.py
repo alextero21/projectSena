@@ -60,7 +60,7 @@ def activateDriver(request):#ESTE NOOOOO
 
     if global_driver and is_driver_active(global_driver):
         # Continuar interactuando con el navegador ya abierto
-        print('ERROR 1')
+
         if request.method == 'POST':     
             user = int(request.POST.get('username'))
             password = request.POST.get('password')
@@ -72,8 +72,8 @@ def activateDriver(request):#ESTE NOOOOO
 
                 usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
                 contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
-                usuario.send_keys(user)
-                contrasena.send_keys(password)
+                usuario.send_keys(1234192477)
+                contrasena.send_keys('Colgate123456')
 
                 contrasena.send_keys(Keys.ENTER)              
 
@@ -89,7 +89,6 @@ def activateDriver(request):#ESTE NOOOOO
             
 
     else:
-        print('ERROR 2')
         # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
         global_driver = initialize_driver()
         global_driver.get(url + 'index.php?login=true')
@@ -138,19 +137,14 @@ def get_url(request,href):
       return JsonResponse({'status':404, 'message':'Error en el navegador','url':'home'})
 
 def testing(request):
-    # Obtener los datos enviados en la solicitud AJAX
-
-    
-
-    return render(request, 'test.html')
-    
-
-def getContent(request):
-
     global global_driver
+    
+   
+    # Comprobar si el controlador está activo
+    # if global_driver and is_driver_active(global_driver):
 
     if global_driver and is_driver_active(global_driver):
-            
+  
         global_driver.get(url+'init.php?muro=1')
 
         num_elementos_anteriores = 0
@@ -164,9 +158,11 @@ def getContent(request):
                 WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link), posts)
                 ver_mas_link.click()
 
+
                 time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
                 num_elementos_anteriores = num_elementos_actuales
                 num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+                print('Total numeros: '+num_elementos_anteriores)
 
                 # Obtener y mostrar el contenido de los elementos "post"
                 post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
@@ -190,7 +186,88 @@ def getContent(request):
                             tarea_param = parse_qs(parsed_url_boton.query).get("tarea")
                             
                             if grupo_param and grupo_param[0] == "2776992" and tarea_param:
-                                print("Elemento con grupo 2776992 y tarea:", post_element.text)
+                                print("Elemento con grupo 2776992 y tarea:", tarea_param)
+
+
+            except:
+                # Si el elemento ya no es interactable, salir del bucle
+                break
+
+        WebDriverWait(global_driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]")))
+
+
+        return JsonResponse({'status': 200, 'message': 'ABIERTO EL CONTROLADOR Y OBTENIDOS TODOS LOS POST'})
+
+    else:
+        # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
+        global_driver = initialize_driver()
+        global_driver.get(url + 'index.php?login=true')
+
+        wait = WebDriverWait(global_driver, 10)
+
+        usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
+        contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
+        usuario.send_keys(1234192477)
+        contrasena.send_keys('Colgate123456')
+
+        contrasena.send_keys(Keys.ENTER) 
+        return JsonResponse({'status': 200, 'message': 'YA ABRIO EL LOGIN'})
+    
+
+       
+    
+
+def getContent(request):
+
+    global global_driver
+
+    test=True
+
+    # if global_driver and is_driver_active(global_driver):
+    if test:
+            
+        global_driver.get(url+'init.php?muro=1')
+
+        num_elementos_anteriores = 0
+        num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+
+        while num_elementos_actuales > num_elementos_anteriores:
+            ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
+            posts = EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]"))
+            try:
+                # Esperar a que el elemento sea interactable antes de hacer clic en él
+                WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link), posts)
+                ver_mas_link.click()
+
+
+                time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
+                num_elementos_anteriores = num_elementos_actuales
+                num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+                print('Total numeros: '+num_elementos_anteriores)
+
+                # Obtener y mostrar el contenido de los elementos "post"
+                post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
+                for post_element in post_elements:
+
+                    # Buscar las clases "nombres" dentro del elemento "post"
+                    nombres_elements = post_element.find_elements(By.CLASS_NAME, "nombres")
+                    for nombres_element in nombres_elements:
+                        href = nombres_element.get_attribute("href")
+                        parsed_url = urlparse(href)
+                        grupo_param = parse_qs(parsed_url.query).get("grupo")#tarea=483078840
+
+                        # if grupo_param and grupo_param[0] == "2776992":
+                        #     print("Elemento con grupo 2776992:", post_element.text)
+
+                         # Buscar la clase "botonPersonalizadoBootstrap" dentro del elemento "post"
+                        boton_elements = post_element.find_elements(By.CLASS_NAME, "botonPersonalizadoBootstrap")
+                        for boton_element in boton_elements:
+                            href_boton = boton_element.get_attribute("href")
+                            parsed_url_boton = urlparse(href_boton)
+                            tarea_param = parse_qs(parsed_url_boton.query).get("tarea")
+                            
+                            if grupo_param and grupo_param[0] == "2776992" and tarea_param:
+                                print("Elemento con grupo 2776992 y tarea:", tarea_param)
 
 
             except:
@@ -204,8 +281,8 @@ def getContent(request):
 
     else:
             # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
-            # global_driver = initialize_driver()
-            # global_driver.get(url+'init.php?muro=1')
+            global_driver = initialize_driver()
+            global_driver.get(url+'init.php?muro=1')
 
             return JsonResponse({'status': 400, 'message': 'ERROR'})
 
