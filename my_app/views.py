@@ -151,6 +151,8 @@ def testing(request):
         num_elementos_anteriores = 0
         num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
 
+
+        tarea_values = []
         while num_elementos_actuales > num_elementos_anteriores:
             ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
             posts = EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]"))
@@ -162,6 +164,8 @@ def testing(request):
                 time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
                 num_elementos_anteriores = num_elementos_actuales
                 num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+                print('Números actuales:', num_elementos_actuales)
+                print('Números anteriores:', num_elementos_anteriores)
 
                 # Obtener y mostrar el contenido de los elementos "post"
                 post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
@@ -185,12 +189,13 @@ def testing(request):
                             tarea_param = parse_qs(parsed_url_boton.query).get("tarea")
                             
                             if grupo_param and grupo_param[0] == "2776992" and tarea_param:
-                                print("Elemento con grupo 2776992 y tarea:", post_element.text)
-
-
+                                tarea_values.append(tarea_param[0])
             except:
                 # Si el elemento ya no es interactable, salir del bucle
                 break
+
+        print("Valores de tarea_param:", tarea_values)
+        print(num_elementos_actuales)
 
         WebDriverWait(global_driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]")))
 
