@@ -15,6 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from django.http import JsonResponse
 from urllib.parse import urlparse, parse_qs
+from selenium.common.exceptions import NoSuchElementException
 
 global_driver = None
 url = 'https://sena.territorio.la/'
@@ -149,56 +150,65 @@ def testing(request):
         # global_driver.get(url+'init.php?muro=1')
         global_driver.get('http://localhost:8000/probar')
 
+  
         num_elementos_anteriores = 0
-        num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
+        # ultimo_array_valores = []
+        unique_posts = set()
+        unique_tarea_params = set()
+        while True:
+            # Esperar a que se carguen más elementos "post"
+            WebDriverWait(global_driver, 10).until(
+                EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]"))
+            )
 
+            post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
+            
+            if len(post_elements) == num_elementos_anteriores:
+                # No hay nuevos elementos cargados, salir del ciclo
+                break
 
-        tarea_values = []
-        while num_elementos_actuales > num_elementos_anteriores:
-            ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
-            posts = EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]"))
-            try:
-                # Esperar a que el elemento sea interactable antes de hacer clic en él
-                WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link), posts)
-                ver_mas_link.click()
-
-                time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
-                num_elementos_anteriores = num_elementos_actuales
-                num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
-                print('Números actuales:', num_elementos_actuales)
-                print('Números anteriores:', num_elementos_anteriores)
-
-                # Obtener y mostrar el contenido de los elementos "post"
-                post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
-                for post_element in post_elements:
-
-                    # Buscar las clases "nombres" dentro del elemento "post"
-                    nombres_elements = post_element.find_elements(By.CLASS_NAME, "nombres")
-                    for nombres_element in nombres_elements:
-                        href = nombres_element.get_attribute("href")
-                        parsed_url = urlparse(href)
-                        grupo_param = parse_qs(parsed_url.query).get("grupo")#tarea=483078840
-
-                        # if grupo_param and grupo_param[0] == "2776992":
-                        #     print("Elemento con grupo 2776992:", post_element.text)
-
-                         # Buscar la clase "botonPersonalizadoBootstrap" dentro del elemento "post"
+            for post_element in post_elements:
+                # Buscar las clases "nombres" dentro del elemento "post"
+                nombres_elements = post_element.find_elements(By.CLASS_NAME, "nombres")
+                for nombres_element in nombres_elements:
+                    href = nombres_element.get_attribute("href")
+                    parsed_url = urlparse(href)
+                    grupo_param = parse_qs(parsed_url.query).get("grupo")
+                    
+                    if grupo_param and grupo_param[0] == "2776992":
+                        # Buscar la clase "botonPersonalizadoBootstrap" dentro del elemento "post"
                         boton_elements = post_element.find_elements(By.CLASS_NAME, "botonPersonalizadoBootstrap")
                         for boton_element in boton_elements:
                             href_boton = boton_element.get_attribute("href")
                             parsed_url_boton = urlparse(href_boton)
                             tarea_param = parse_qs(parsed_url_boton.query).get("tarea")
-                            
-                            if grupo_param and grupo_param[0] == "2776992" and tarea_param:
-                                tarea_values.append(tarea_param[0])
-            except:
-                # Si el elemento ya no es interactable, salir del bucle
+                            if tarea_param:
+                                tarea_value = tarea_param[0]  # Obtener el valor de tarea_param
+                                unique_tarea_params.add(tarea_value)
+                                # unique_posts.add(post_element.text)
+
+            num_elementos_anteriores = len(post_elements)
+            
+            # Intentar ubicar y hacer clic en el botón "Ver más"
+            try:
+                ver_mas_button = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
+                ver_mas_button.click()
+            except NoSuchElementException:
+                # Si no se encuentra el botón "Ver más", el ciclo ha terminado
                 break
 
-        print("Valores de tarea_param:", tarea_values)
-        print(num_elementos_actuales)
+        # Convertir el conjunto de "unique_posts" en una lista
+        # unique_posts_list = list(unique_posts)
+        # for post_text in unique_posts_list:
+        #     print(post_text)
 
-        WebDriverWait(global_driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]")))
+        # Imprimir los valores únicos de tarea_param
+        for tarea_param in unique_tarea_params:
+            print(f"Valor único de tarea_param: {tarea_param}")
+
+
+
+        # WebDriverWait(global_driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]")))
 
 
         return JsonResponse({'status': 200, 'message': 'ABIERTO EL CONTROLADOR Y OBTENIDOS TODOS LOS POST'})
