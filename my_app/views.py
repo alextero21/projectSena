@@ -146,7 +146,8 @@ def testing(request):
     if global_driver and is_driver_active(global_driver):
         # AQUI COMIENZA EL MURO
 
-        global_driver.get(url+'init.php?muro=1')
+        # global_driver.get(url+'init.php?muro=1')
+        global_driver.get('http://localhost:8000/probar')
 
         num_elementos_anteriores = 0
         num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
@@ -202,25 +203,28 @@ def testing(request):
 
         return JsonResponse({'status': 200, 'message': 'ABIERTO EL CONTROLADOR Y OBTENIDOS TODOS LOS POST'})
 
-      
-            
-
     else:
         # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
         global_driver = initialize_driver()
-        global_driver.get(url + 'index.php?login=true')
+        # global_driver.get(url + 'index.php?login=true')
+        global_driver.get('http://localhost:8000/probar')
 
-        wait = WebDriverWait(global_driver, 10)
+        return JsonResponse({'status':200, 'message':'Abriendo controladorsssssssss'})
+        # wait = WebDriverWait(global_driver, 10)
 
-        usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
-        contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
-        usuario.send_keys(1234192477)
-        contrasena.send_keys('Colgate123456')
+        # usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
+        # contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
+        # usuario.send_keys(1234192477)
+        # contrasena.send_keys('Colgate123456')
 
-        contrasena.send_keys(Keys.ENTER)     
+        # contrasena.send_keys(Keys.ENTER)     
     
-        return JsonResponse({'status':200, 'message':'Abriendo controlador'})
+        
     
+def test(request):
+
+    return render(request, 'test.html')
+
 
 def getContent(request):
 
