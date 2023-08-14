@@ -147,8 +147,8 @@ def testing(request):
     if global_driver and is_driver_active(global_driver):
         # AQUI COMIENZA EL MURO
 
-        # global_driver.get(url+'init.php?muro=1')
-        global_driver.get('http://localhost:8000/probar')
+        global_driver.get(url+'init.php?muro=1')
+        # global_driver.get('http://localhost:8000/probar')
 
   
         unique_posts = []
@@ -165,6 +165,7 @@ def testing(request):
                     EC.presence_of_element_located((By.XPATH, "//a[contains(text(), 'Ver más')]"))
                 )
                 ver_mas_button.click()
+                time.sleep(1) 
 
                 WebDriverWait(global_driver, 10).until(
                     EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]"))
@@ -202,24 +203,25 @@ def testing(request):
                             contenido_parrafos = [parrafo.text for parrafo in post_element.find_elements(By.CSS_SELECTOR, ".span12 p")]
                             contenidoEvidencias.append(" ".join(contenido_parrafos))
 
+                           
 
         return JsonResponse({'status': 200,'date_end':element_fechaEntrega, 'names':element_name, 'content':contenidoEvidencias})
 
     else:
         # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
         global_driver = initialize_driver()
-        # global_driver.get(url + 'index.php?login=true')
-        global_driver.get('http://localhost:8000/probar')
+        global_driver.get(url + 'index.php?login=true')
+        # global_driver.get('http://localhost:8000/probar')
+        wait = WebDriverWait(global_driver, 10)
 
-        return JsonResponse({'status':200, 'message':'Abriendo controladorsssssssss'})
-        # wait = WebDriverWait(global_driver, 10)
+        usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
+        contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
+        usuario.send_keys(1234192477)
+        contrasena.send_keys('Colgate123456')
 
-        # usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
-        # contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
-        # usuario.send_keys(1234192477)
-        # contrasena.send_keys('Colgate123456')
+        contrasena.send_keys(Keys.ENTER)     
 
-        # contrasena.send_keys(Keys.ENTER)     
+        return JsonResponse({'status':200, 'message':'Abierto TERROTORIUM LOGIN'})
     
         
     
