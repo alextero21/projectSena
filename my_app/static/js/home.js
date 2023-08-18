@@ -70,31 +70,100 @@ var valueTab = 5;
 
 $(document).ready(function () {
 
+  // var objetjson= [
+  //   {'name':'alex', 
+  //   'age':47,
+  //   'city':['London', 'Paris', 'Sao paulo' ]
+  //   },
+  //   {'name':'camilo'}
+  // ]
 
-var csrfToken = $('[name=csrfmiddlewaretoken]').val();
-$.ajax({
-  url: '/getPosts',
-  type: 'POST',
-  data: {pagina:'ejemplo'},
-  dataType: 'json', // Opcional, dependiendo del tipo de respuesta esperado
-  beforeSend: function(xhr) {
-      // Agregar el token CSRF a la cabecera de la solicitud
-      xhr.setRequestHeader('X-CSRFToken', csrfToken);
-  },
-  success: function(data) {
-      // Callback function para manejar la respuesta del servidor
-      // data contiene la respuesta del servidor
-      console.log(data)
-  },
-  error: function(xhr, textStatus, errorThrown) {
-      // Función que se ejecuta si la solicitud falla
-      console.log(textStatus)
-  }
-});
+  // console.log(objetjson);
 
 
 
+  // var csrfToken = $('[name=csrfmiddlewaretoken]').val();
+  // $.ajax({
+  //   // url: '/getPosts',
+  //   url: '/probar',
+  //   type: 'POST',
+  //   data: {pagina:'ejemplo'},
+  //   dataType: 'json', // Opcional, dependiendo del tipo de respuesta esperado
+  //   beforeSend: function(xhr) {
+  //       // Agregar el token CSRF a la cabecera de la solicitud
+  //       xhr.setRequestHeader('X-CSRFToken', csrfToken);
+  //   },
+  //   success: function(data) {
+  //       // Callback function para manejar la respuesta del servidor
+  //       // data contiene la respuesta del servidor
+  //       // console.log(data.nombre[0]);
+  //       card= $('#card')
+  //       var template_card = ``
+        
+  //       // console.log(data.data.length);
+
+    
+  //       for (let i = 0; i < data.data.length; i++) {
+
+  //         var d=data.data[i]
+         
+
+  //         var content = ``
+  //         for (let e = 0; e < d.names.length; e++) {
+            
+  //           var nombre = d.names[e];
+  //           var contenido = d.content[e];
+  //           // var classroom = arrayData.classroom;
+
+  //           content+=`
+  //             <li class="list-group-item">`+(e+1)+`. `+nombre+`: <a href="">`+contenido+`</a></li>
+  //           `
+  //           // titulo_curso+=classroom
+  //         }
+
+          
+  //         template_card += `
+  //           <div class="card decoration_card" style="width: 18rem;">
+  //             <img src="../static/images/agente.png" class="card-img-top" alt="...">
+  //             <div class="card-body">
+  //               <h5 class="card-title ">`+d.classroom+`</h5>
+  //               <p class="card-text">Recorderis: sadsadasd</p>
+  //             </div>
+  //             <ul class="list-group list-group-flush ">
+  //               `+content+`
+  //             </ul>
+              
+  //             <div class="card-body decoration_card">
+  //               <a href="#" class="card-link btn btn-light">Todas las tareas</a>
+  //               <a href="{{'getUrl'}}{{e.href}}" class="card-link btn btn-warning">Ver curso</a>
+  //             </div>
+  //           </div>
+  //         `
 
 
+  //       }       
 
-});
+  //       card.html(template_card)
+
+
+  //   },
+  //   error: function(xhr, textStatus, errorThrown) {
+  //       // Función que se ejecuta si la solicitud falla
+  //       console.log(xhr)
+  //       console.log(textStatus)
+  //       console.log(errorThrown)
+  //   }
+  // });
+  
+  
+  
+  // $("body").attr("class","modal-open").css("overflow","hidden").css("padding-right" ,"0px").css("data-bs-overflow","hidden").css("data-bs-padding-right","0px")
+  // $("#prueba").attr("class","modal-backdrop fade show")
+  // $(".modal").attr("class","modal fade show").css("display","block")
+
+  
+  });
+
+  //Tarea: Maria Elena
+  //Contexto de la tarea
+  //Usar Tailwind-> Titulo, escribir descripcion, subir archivo, enviar evidencia

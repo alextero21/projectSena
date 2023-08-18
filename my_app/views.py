@@ -117,13 +117,15 @@ def home(request):
 
         
 
-
+        
         return render(request, 'home.html',{'content':contenido_class})
 
     
     else:
             # Código para manejar el inicio de sesión fallido
-        return render(request, 'test.html')
+        # return render(request, 'test.html')
+        
+        return render(request, 'home.html',{'content':'123'})
 
     # return HttpResponseRedirect('/login')
 
@@ -137,14 +139,98 @@ def get_url(request,href):
     else:
       return JsonResponse({'status':404, 'message':'Error en el navegador','url':'home'})
 
+
 def testing(request):
-    global global_driver
     
-   
-    # Comprobar si el controlador está activo
-    # if global_driver and is_driver_active(global_driver):
+    return render(request, 'other.html')
+
+@csrf_protect
+def test(request):
+
+
+
+    data = [       {
+            "id_classroom": "6726881",
+            "classroom": "Inglés",
+            "status": 200,
+            "date_end": [
+                "Fecha de entrega: 2023-07-30 23:30:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-08-04 23:30:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-08-12 14:45:00\nArchivos:\nResponder Evidencia",
+            ],
+            "names": [
+                "YULIETH JARAMILLO OSPINA",
+                "EDGAR DE JESUS ARENAS VARGAS",
+                "EIKA YILIETH PEREZ",
+
+            ],
+            "content": [
+                "Buenas tardes. Por favor subir la actividad desarrollada en el ambiente de aprendizaje",
+                "Subir la tarea de ingles que si no sabes es esta que te voy a mostrar a continuacion",
+                "Los dibujos didacticos que te di tienen que ser diferentes y por eso el grupo debe de saber cual es",
+                
+            ]
+                
+        },
+
+        {    
+            "id_classroom": "2776992",
+            "classroom": "Técnico en Servicios Comerciales y Financieros",
+            "status": 200,
+            "date_end": [
+                "Fecha de entrega: 2023-08-12 14:45:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-08-04 23:30:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-07-30 23:30:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-07-26 13:00:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-07-21 11:42:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-07-16 23:30:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-07-26 23:30:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-07-07 23:30:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-06-24 23:30:00\nArchivos:\nTRABAJOnYnCIUDADANnnA.mp4\nCARTILLAnEMPLEOnRETORNOnopn3ncompletonbajan11n10n2017.pdf\nResponder Evidencia",
+                "Fecha de entrega: 2023-06-19 23:30:00\nArchivos:\nResponder Evidencia",
+                "Fecha de entrega: 2023-06-13 23:30:00\nArchivos:\nResponder Evidencia"
+            ],
+            "names": [
+                "MARIA ELENA MONTUFAR MUÑOZ",
+                "JORGE ELIECER VERA TASAMA",
+                "JORGE ELIECER VERA TASAMA",
+                "JORGE ELIECER VERA TASAMA",
+                "YULIETH JARAMILLO OSPINA",
+                "JORGE ELIECER VERA TASAMA",
+                "EDGAR DE JESUS ARENAS VARGAS",
+                "JORGE ELIECER VERA TASAMA",
+                "JORGE ELIECER VERA TASAMA",
+                "JORGE ELIECER VERA TASAMA",
+                "JORGE ELIECER VERA TASAMA"
+            ],
+            "content": [
+                "Buenas tardes. Por favor subir la actividad desarrollada en el ambiente de aprendizaje",
+                "   RAP:     Participar en acciones solidarias   D F T -Espacio para carga de la evidencia 2 Guía 4 Derechos Fundamentales-Los DESC     Apreciado Aprendiz   Se activa el espacio para la carga de evidencia 2 correspondiente a la guía 4 Actividad 2   Evidencia a cargar:  “Derechos económicos sociales y culturales” ",
+                " RAP: Participar en acciones solidarias teniendo en cuenta el ejercicio de los derechos humanos, de los pueblos y de la naturaleza.   Apreciad@ Aprendiz   Se activa el espacio para la carga de evidencia1 correspondiente a la guía 4 Actividad 1   Evidencia a cargar:  “Estado social de derecho y la desprotección legal ” ",
+                "        RAP: Practicar los derechos fundamentales en el trabajo   Asunto: E D F T y C L -Espacio para carga de la evidencia 2 Guía 3 - Herramientas Jurídicas para reclamar el derecho- Derechos Fundamentales   Apreciado Aprendiz Se activa el espacio para la carga de evidencias correspondiente a la guía 3 Actividad 2   Evidencia por cargar: “Herramientas Jurídicas para reclamar el derecho ”   ",
+                " Aquí enviaras los talleres de: -Figuras geométricas áreas, perímetros y volúmenes - Teorema de Pitágoras - Funciones Trigonométricas, en total son 3 archivos para enviar como evidencia de tu trabajo en clase. ",
+                "   RAP: Practicar los derechos fundamentales en el trabajo de acuerdo con la Constitución Política y los Convenios Internacionales.   Apreciado Aprendiz Se activa el espacio para la carga de evidencias correspondiente a la guía 3 Actividad 1   Evidencia por cargar: “artículos constitucionales relacionados con los derechos del trabajador” ",
+                " Elaborar un guion escrito para realizar una simulación donde se identifiquen las características, los tipos de servicios, las tarifas y condiciones del proceso vistos durante la guía. La simulación se realizará en clase para presentar a sus compañeros e instructor. ",
+                " RAP: Valorar la importancia de la ciudadanía laboral Apreciado Aprendiz Se activa el espacio para la carga de evidencia 2- Derecho colectivo del trabajo- correspondiente a la guía 2 Actividad 2.   Producto evidencia a cargar: “Derecho laboral colectivo” ",
+                " RAP: Valorar la importancia de la ciudadanía laboral Apreciado Aprendiz Se activa el espacio para la carga de evidencia 1 correspondiente a la guía 2 Actividad 1. Producto evidencia a cargar: Derecho laboral individual y Ciudadanía Laboral. Recordar que el producto debe socializarse. ",
+                " RAP: Reconocer el trabajo como factor de movilidad social Apreciado Aprendiz Se activa el espacio para la carga de evidencias 2-Actividad 2 correspondiente a la guía 1. Evidencia por cargar: “La Dignidad Humana y Cambios en el Mundo del Trabajo” ",
+                " RAP1: Reconocer el trabajo como factor de movilidad social y transformación vital, con referencia a la fenomenología y a los derechos fundamentales en el trabajo. Apreciado Aprendiz Se activa el espacio para la carga de evidencia 1 correspondiente a la guía 1. Evidencia a cargar: “Evolución del trabajo y su fenomenología” “FUNDAMENTOS DE ECONOMIA”  "
+            ]
+                
+        }
+]
+
+
+    # return render(request, 'test.html')
+    return JsonResponse({'data': data})
+
+
+def getContent(request):
+
+    global global_driver
 
     if global_driver and is_driver_active(global_driver):
+            
         # AQUI COMIENZA EL MURO
 
         global_driver.get(url+'init.php?muro=1')
@@ -205,87 +291,7 @@ def testing(request):
 
                            
 
-        return JsonResponse({'status': 200,'date_end':element_fechaEntrega, 'names':element_name, 'content':contenidoEvidencias})
-
-    else:
-        # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
-        global_driver = initialize_driver()
-        global_driver.get(url + 'index.php?login=true')
-        # global_driver.get('http://localhost:8000/probar')
-        wait = WebDriverWait(global_driver, 10)
-
-        usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
-        contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
-        usuario.send_keys(1234192477)
-        contrasena.send_keys('Colgate123456')
-
-        contrasena.send_keys(Keys.ENTER)     
-
-        return JsonResponse({'status':200, 'message':'Abierto TERROTORIUM LOGIN'})
-    
-        
-    
-def test(request):
-
-    return render(request, 'test.html')
-
-
-def getContent(request):
-
-    global global_driver
-
-    if global_driver and is_driver_active(global_driver):
-            
-        global_driver.get(url+'init.php?muro=1')
-
-        num_elementos_anteriores = 0
-        num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
-
-        while num_elementos_actuales > num_elementos_anteriores:
-            ver_mas_link = global_driver.find_element(By.XPATH, "//a[contains(text(), 'Ver más')]")
-            posts = EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]"))
-            try:
-                # Esperar a que el elemento sea interactable antes de hacer clic en él
-                WebDriverWait(global_driver, 10).until(EC.element_to_be_clickable(ver_mas_link), posts)
-                ver_mas_link.click()
-
-                time.sleep(2)  # Dar tiempo para que los nuevos elementos se carguen
-                num_elementos_anteriores = num_elementos_actuales
-                num_elementos_actuales = len(global_driver.find_elements(By.CSS_SELECTOR, "[id^='post']"))
-
-                # Obtener y mostrar el contenido de los elementos "post"
-                post_elements = global_driver.find_elements(By.XPATH, "//div[starts-with(@id, 'post')]")
-                for post_element in post_elements:
-
-                    # Buscar las clases "nombres" dentro del elemento "post"
-                    nombres_elements = post_element.find_elements(By.CLASS_NAME, "nombres")
-                    for nombres_element in nombres_elements:
-                        href = nombres_element.get_attribute("href")
-                        parsed_url = urlparse(href)
-                        grupo_param = parse_qs(parsed_url.query).get("grupo")#tarea=483078840
-
-                        # if grupo_param and grupo_param[0] == "2776992":
-                        #     print("Elemento con grupo 2776992:", post_element.text)
-
-                         # Buscar la clase "botonPersonalizadoBootstrap" dentro del elemento "post"
-                        boton_elements = post_element.find_elements(By.CLASS_NAME, "botonPersonalizadoBootstrap")
-                        for boton_element in boton_elements:
-                            href_boton = boton_element.get_attribute("href")
-                            parsed_url_boton = urlparse(href_boton)
-                            tarea_param = parse_qs(parsed_url_boton.query).get("tarea")
-                            
-                            if grupo_param and grupo_param[0] == "2776992" and tarea_param:
-                                print("Elemento con grupo 2776992 y tarea:", post_element.text)
-
-
-            except:
-                # Si el elemento ya no es interactable, salir del bucle
-                break
-
-        WebDriverWait(global_driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[starts-with(@id, 'post')]")))
-
-
-        return JsonResponse({'status': 200, 'message': 'ABIERTO EL CONTROLADOR Y OBTENIDOS TODOS LOS POST'})
+        return JsonResponse({'id_classroom':'2776992','status': 200,'date_end':element_fechaEntrega, 'names':element_name, 'content':contenidoEvidencias})
 
     else:
             # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente

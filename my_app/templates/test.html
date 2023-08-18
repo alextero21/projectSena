@@ -8,7 +8,7 @@
   <title>Document</title>
 </head>
 <body>
-
+  {% csrf_token %}
   <style>
     .texto {
   border: 1px solid #ccc;
@@ -230,6 +230,8 @@
       </div>
 
   </div>
+
+  <div id="another"></div>
   <a href="#" id="verMas">Ver más</a>
 
   <!-- Tu contenido HTML actual aquí -->
