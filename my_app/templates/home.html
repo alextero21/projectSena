@@ -20,6 +20,7 @@
   {% include 'base.html' %}
   {% csrf_token %}
 
+
   <div id="containt">
 
     <div id='slider-main'>
@@ -45,21 +46,45 @@
     </div>
 
 
-    
 
 
-    <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-  Launch demo modal
-</button>
+
+
+    <div id="card">
+      {% if content %}
+  
+        {% for e in content %}
+  
+          <div class="card decoration_card" style="width: 18rem;">
+            <img src="../static/images/agente.png" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title ">{{e.texto}}</h5>
+              <p class="card-text">Recorderis: sadsadasd</p>
+            </div>
+            <ul class="list-group list-group-flush ">
+              <li class="list-group-item">Tarea 1: <a href="">Con tus fotos hacer una mapa de ideas creando la historia de tu vida, en el momento en que tuviste grandes ideas</a></li>
+              <li class="list-group-item">Tarea 2: <a href="">Crear una diapositiva xd</a></li>
+              <li class="list-group-item">Tarea 3: <a href="">En word hacer los derechos laborales</a></li>
+            </ul>
+            <div class="card-body decoration_card">
+              <a href="#" class="card-link btn btn-light">Todas las tareas</a>
+              <a href="{{'getUrl'}}{{e.href}}" class="card-link btn btn-warning">Ver curso</a>
+            </div>
+          </div>
+  
+        {% endfor %}
+  
+      {% endif %}
+    </div>
+
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Profesor: X </h1>
-        <h2 class="modal-title fs-5" id="exampleModalLabel">Materia: X </h2>
+        <h1 class="modal-title fs-5" id="teacher_title">Profesor: X </h1>
+        <h2 class="modal-title fs-5" id="work_title">Materia: X </h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
@@ -73,17 +98,17 @@
           </div>
 
           <div class="input-group">
-            <textarea class="form-control" aria-label="With textarea"></textarea>
-            <button type="button" class="btn btn-outline-primary">Enviar</button>
+            <textarea class="form-control" aria-label="With textarea" placeholder="Algun dato o informacion para el profe (Opcional)"></textarea>
+            <button type="button" class="btn btn-outline-primary" id="btn_send_evidence">Enviar</button>
             <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
               <span class="visually-hidden">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#">Actionw</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+              <li><a class="dropdown-item" href="#">Después</a></li>
+              <li><a class="dropdown-item" href="#">Después</a></li>
+              <li><a class="dropdown-item" href="#">Después</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Separated link</a></li>
+              <li><a class="dropdown-item" href="#">Después</a></li>
             </ul>
           </div>
 
