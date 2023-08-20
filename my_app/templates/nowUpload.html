@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <title>Document</title>
+  {% load static %}
+</head>
+<body>
+  {% csrf_token %}
+  <!-- <form action="http://localhost:8000/test" method="post" enctype="multipart/form-data">
+    
+    <input type="file" name="file[]" id="file" multiple>
+    <input type="submit" value="Enviar imagen">
+    
+  </form> -->
+
+  <input type="file" name="file" id="file" multiple>
+  <input type="text" name="vinculo" id="vinculo">
+  <button id="sendImage">Enviar imagen</button>
+
+  <script src="{% static 'js/upload.js' %}"></script>
+</body>
+</html>

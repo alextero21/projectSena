@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from my_app import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -27,6 +29,11 @@ urlpatterns = [
     path('probar', views.test, name='test'),
     path('onDriver', views.activateDriver, name='onDriver'),
     path('getPosts', views.getContent, name='getContent'),
-    path('getUrl/<str:href>', views.get_url, name='getUrl')
+    path('getUrl/<str:href>', views.get_url, name='getUrl'),
+    path('file', views.file, name='file')
 
 ]
+
+# Agrega esto al final para manejar las URL de archivos multimedia en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -16,6 +16,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from django.http import JsonResponse
 from urllib.parse import urlparse, parse_qs
 from selenium.common.exceptions import NoSuchElementException
+from django.core.files.storage import default_storage
+import os
+from django.conf import settings
 
 global_driver = None
 url = 'https://sena.territorio.la/'
@@ -123,9 +126,9 @@ def home(request):
     
     else:
             # Código para manejar el inicio de sesión fallido
-        # return render(request, 'test.html')
+        return render(request, 'upload.html')
         
-        return render(request, 'home.html',{'content':'123'})
+        # return render(request, 'home.html',{'content':'123'})
 
     # return HttpResponseRedirect('/login')
 
@@ -139,10 +142,67 @@ def get_url(request,href):
     else:
       return JsonResponse({'status':404, 'message':'Error en el navegador','url':'home'})
 
-
+@csrf_protect
 def testing(request):
+    global global_driver
+
+    if global_driver and is_driver_active(global_driver):
+        # Continuar interactuando con el navegador ya abierto
+        # Abrir la página que contiene el formulario para subir archivos
+        global_driver.get("http://localhost:8000/file")
+
+        wait = WebDriverWait(global_driver, 10)
+        archivos = request.FILES.getlist('files[]')
+        
+
+        archivo_ruta = []  # Inicializa la lista para las rutas de los archivos
+        
+        for archivo in archivos:
+            # Aquí puedes acceder a los datos del archivo, por ejemplo:
+  
+            # Guarda el archivo en el sistema de archivos (por ejemplo, en el directorio "uploads")
+            archivo_path = default_storage.save(f"{archivo.name}", archivo)
+            
+            # Convierte la ruta relativa a absoluta
+            archivo_path_abs = os.path.abspath("uploads/"+archivo_path)
+
+            archivo_ruta.append(archivo_path_abs)
+
+            
+
+        # Envía las rutas de los archivos al elemento input
+        # ruta1="http://localhost:8000/uploads/banco.png"
+        # ruta2="C:/Users/TeamAdenel/Music/projectSena/my_app/uploads/banco.png"
+
+
+        # Encuentra el elemento de entrada de archivo (input type="file") por su atributo "name" o "id"
+        input_archivo = wait.until(EC.presence_of_element_located((By.ID, "file")))
+        
+        
+
+        # Agrega la ruta del archivo a la lista
+        input_archivo.send_keys("\n".join(archivo_ruta))
+        #Si se ha typeado un vinculo, entonces se activa el find_element
+        if request.POST.get('vinculo') :
+            text_vinculo = request.POST.get('vinculo')
+            contentSena= global_driver.find_element(By.XPATH, '//*[@id="divVinculosRespuesta"]/a')
+            contentSena.click()
+            input_vinculo = global_driver.find_element(By.ID, "linktare")
+            input_vinculo.send_keys(text_vinculo)
+
     
-    return render(request, 'other.html')
+        boton_enviar = global_driver.find_element(By.XPATH, "//*[@id='contestarTareaBoton']")
+
+        boton_enviar.click()
+           
+        return JsonResponse({'status':200, 'message':'Éxito','url':'home'})
+          
+    else:
+        # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
+        global_driver = initialize_driver()
+        global_driver.get("http://localhost:8000/file")
+    
+        return render(request, 'nowUpload.html')#la pagina mia prinicipal para enviar a territorium las imagenes
 
 @csrf_protect
 def test(request):
@@ -260,6 +320,28 @@ def test(request):
     # return render(request, 'test.html')
     return JsonResponse({'data': data})
 
+
+def file(request):
+    # print(request)
+    if request.method == 'POST':#Cuando se da clic para las imagenes en territorium "
+        archivos = request.FILES.getlist('files[]')
+        textoData = request.POST.get('textData')
+        
+
+        for archivo in archivos:
+            # Aquí puedes acceder a los datos del archivo, por ejemplo:
+            nombre_archivo = archivo.name
+            contenido_archivo = archivo.read()
+            print('Nombre de: ',nombre_archivo)
+
+        print(textoData)
+
+        return JsonResponse({'status':200})
+    else:
+        # print('TODAVIA NO HAY POST')
+        return render(request, 'upload.html')#la pagina de territorium "
+
+    
 
 def getContent(request):
 

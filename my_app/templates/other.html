@@ -15,23 +15,6 @@
   {% csrf_token %}
   Claro que sí
 
-  <div class="card decoration_card" style="width: 18rem;">
-    <img src="../static/images/agente.png" class="card-img-top" alt="...">
-    <div class="card-body">
-      <h5 class="card-title ">{{e.texto}}</h5>
-      <p class="card-text">Recorderis: sadsadasd</p>
-    </div>
-    <div style="text-align: center; background-color: rgb(0, 81, 255); color: rgb(231, 231, 231);">Tareas</div>
-    <ul class="list-group list-group-flush ">
-      <li class="list-group-item">Tarea 1: <a href="">Con tus fotos hacer una mapa de ideas creando la historia de tu vida, en el momento en que tuviste grandes ideas</a></li>
-      <li class="list-group-item">Tarea 2: <a href="">Crear una diapositiva xd</a></li>
-      <li class="list-group-item">Tarea 3: <a href="">En word hacer los derechos laborales</a></li>
-    </ul>
-    <div class="card-body decoration_card">
-      <a href="#" class="card-link btn btn-light">Todas las tareas</a>
-      <a href="{{'getUrl'}}{{e.href}}" class="card-link btn btn-warning">Ver curso</a>
-    </div>
-  </div>
 
   <script src="{% static 'js/other.js' %}"></script>
 </body>
