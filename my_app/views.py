@@ -151,49 +151,57 @@ def testing(request):
         # Abrir la página que contiene el formulario para subir archivos
         global_driver.get("http://localhost:8000/file")
 
-        wait = WebDriverWait(global_driver, 10)
-        archivos = request.FILES.getlist('files[]')
-        
+        if request.POST.get('vinculo') or  request.FILES.getlist('files[]'):
 
-        archivo_ruta = []  # Inicializa la lista para las rutas de los archivos
-        
-        for archivo in archivos:
-            # Aquí puedes acceder a los datos del archivo, por ejemplo:
-  
-            # Guarda el archivo en el sistema de archivos (por ejemplo, en el directorio "uploads")
-            archivo_path = default_storage.save(f"{archivo.name}", archivo)
-            
-            # Convierte la ruta relativa a absoluta
-            archivo_path_abs = os.path.abspath("uploads/"+archivo_path)
-
-            archivo_ruta.append(archivo_path_abs)
-
+            if request.FILES.getlist('files[]'):
+                wait = WebDriverWait(global_driver, 10)
+                archivos = request.FILES.getlist('files[]')
             
 
-        # Envía las rutas de los archivos al elemento input
-        # ruta1="http://localhost:8000/uploads/banco.png"
-        # ruta2="C:/Users/TeamAdenel/Music/projectSena/my_app/uploads/banco.png"
-
-
-        # Encuentra el elemento de entrada de archivo (input type="file") por su atributo "name" o "id"
-        input_archivo = wait.until(EC.presence_of_element_located((By.ID, "file")))
+                archivo_ruta = []  # Inicializa la lista para las rutas de los archivos
+                
+                for archivo in archivos:
+                    # Aquí puedes acceder a los datos del archivo, por ejemplo:
         
-        
+                    # Guarda el archivo en el sistema de archivos (por ejemplo, en el directorio "uploads")
+                    archivo_path = default_storage.save(f"{archivo.name}", archivo)
+                    
+                    # Convierte la ruta relativa a absoluta
+                    archivo_path_abs = os.path.abspath("uploads/"+archivo_path)
 
-        # Agrega la ruta del archivo a la lista
-        input_archivo.send_keys("\n".join(archivo_ruta))
-        #Si se ha typeado un vinculo, entonces se activa el find_element
-        if request.POST.get('vinculo') :
-            text_vinculo = request.POST.get('vinculo')
-            contentSena= global_driver.find_element(By.XPATH, '//*[@id="divVinculosRespuesta"]/a')
-            contentSena.click()
-            input_vinculo = global_driver.find_element(By.ID, "linktare")
-            input_vinculo.send_keys(text_vinculo)
+                    archivo_ruta.append(archivo_path_abs)
+
+                    
+
+                # Envía las rutas de los archivos al elemento input
+                # ruta1="http://localhost:8000/uploads/banco.png"
+                # ruta2="C:/Users/TeamAdenel/Music/projectSena/my_app/uploads/banco.png"
+
+
+                # Encuentra el elemento de entrada de archivo (input type="file") por su atributo "name" o "id"
+                input_archivo = wait.until(EC.presence_of_element_located((By.ID, "file")))
+                
+                
+
+                # Agrega la ruta del archivo a la lista
+                input_archivo.send_keys("\n".join(archivo_ruta))
+                #Si se ha typeado un vinculo, entonces se activa el find_element
+
+            if request.POST.get('vinculo'):
+                text_vinculo = request.POST.get('vinculo')
+                contentSena= global_driver.find_element(By.XPATH, '//*[@id="divVinculosRespuesta"]/a')
+                contentSena.click()
+                input_vinculo = global_driver.find_element(By.ID, "linktare")
+                input_vinculo.send_keys(text_vinculo)
+
+            boton_enviar = global_driver.find_element(By.XPATH, "//*[@id='contestarTareaBoton']")
+
+            boton_enviar.click()
+
+
 
     
-        boton_enviar = global_driver.find_element(By.XPATH, "//*[@id='contestarTareaBoton']")
-
-        boton_enviar.click()
+        
            
         return JsonResponse({'status':200, 'message':'Éxito','url':'home'})
           
@@ -333,9 +341,9 @@ def file(request):
             nombre_archivo = archivo.name
             contenido_archivo = archivo.read()
             print('Nombre de: ',nombre_archivo)
-
+            # print(contenido_archivo)
         print(textoData)
-
+        print('TENGO LO MIO')
         return JsonResponse({'status':200})
     else:
         # print('TODAVIA NO HAY POST')
