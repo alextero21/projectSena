@@ -18,7 +18,9 @@ from urllib.parse import urlparse, parse_qs
 from selenium.common.exceptions import NoSuchElementException
 from django.core.files.storage import default_storage
 import os
+import re
 from django.conf import settings
+from selenium.common.exceptions import TimeoutException
 
 global_driver = None
 url = 'https://sena.territorio.la/'
@@ -30,16 +32,10 @@ url_perfil_id = 'perfil.php?id=31247202'
 
 import time
 
-
-
 def initialize_driver():
     options = webdriver.ChromeOptions()
     options.add_experimental_option("detach", True)
     return webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
-
-
-
-
 
 def login(request):#La pagina mia
 
@@ -174,10 +170,6 @@ def find_post(request):
 
         return JsonResponse({'status': 400, 'message': 'ERROR DEL BUENO'})
 
-    
-
-
-
 def home(request):
 
 
@@ -203,8 +195,8 @@ def home(request):
             # Código para manejar el inicio de sesión fallido
         # return render(request, 'upload.html')
         # return JsonResponse({'status':200, 'message':'Excelente','url':'test'})
-        global_driver = initialize_driver()
-        global_driver.get(url + 'index.php?login=true')
+        # global_driver = initialize_driver()
+        # global_driver.get(url + 'index.php?login=true')
 
         return render(request, 'home.html',{'content':'123'})
 
@@ -222,6 +214,76 @@ def get_url(request,href):
 
 @csrf_protect
 def test(request):
+
+    id_clase='2776992'
+
+    global global_driver
+
+    if global_driver and is_driver_active(global_driver):
+            
+        # AQUI COMIENZA EL MURO
+        global_driver.get(url+'tareas.php?clase='+id_clase)
+        # nombres_elements = global_driver.find_element(By.ID, "divContentListaTareas")
+        # Esperar a que el elemento esté presente en la página
+        wait = WebDriverWait(global_driver, 10)
+        div_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="divContentListaTareas"]/div[starts-with(@id, "tarea")]')))
+
+        # Lista para almacenar los números de tarea
+        numeros_tarea = []
+
+        # Iterar a través de los elementos div
+        for div_element in div_elements:
+            numero_tarea = div_element.get_attribute("id").replace("tarea[", "").replace("]", "")#//*[@id="divInformacionTarea"]
+            numeros_tarea.append(numero_tarea)#divInformacionTarea
+
+        for tareas_num in numeros_tarea:
+            time.sleep(1) 
+            global_driver.get(url+'tarea_tt.php?tarea='+str(tareas_num))
+            
+            wait = WebDriverWait(global_driver, 10)
+            divInformacionTarea = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divInformacionTarea"]')))#//*[@id="FechaTareaInicio"]
+            
+            # Obtener el valor de FechaTareaInicio
+            fecha_tarea_inicio = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTareaInicio"]').text
+
+            # Obtener el valor de FechaTarea
+            fecha_tarea = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTarea"]').text
+
+            # Obtener el texto de ConTare
+            ConTituloBtc = divInformacionTarea.find_element(By.ID, 'ConTituloBtc').text
+            con_tare_texto = divInformacionTarea.find_element(By.ID, 'ConTare').text
+
+            print(ConTituloBtc)
+            print(con_tare_texto)
+            print(fecha_tarea_inicio)
+            print(fecha_tarea)
+
+           
+
+            
+
+
+        #1234192477
+        #Colgate123456
+
+        # Imprimir la lista de números de tarea
+        # global_driver.get(url+'tarea_tt.php?tarea='+str(tarea_id))
+        # print(numeros_tarea)
+        
+        # global_driver.get('http://localhost:8000/probar')
+        #https://sena.territorio.la/tareas.php?clase=2776992
+
+
+        return JsonResponse({'id_classroom':'2776992','status': 200})
+
+    else:
+            # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
+            global_driver = initialize_driver()
+            global_driver.get(url + 'index.php?login=true')
+            
+            return JsonResponse({'status': 400, 'message': 'ERROR'})
+
+    #https://sena.territorio.la/tareas.php?clase=2776992
 
 
 
@@ -347,6 +409,7 @@ def getContent(request):
 
         global_driver.get(url+'init.php?muro=1')
         # global_driver.get('http://localhost:8000/probar')
+        #https://sena.territorio.la/tareas.php?clase=2776992
 
   
         unique_posts = []
