@@ -25,12 +25,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login', views.login, name='login'),
     path('home', views.home, name='home'),
-    path('test', views.testing, name='testing'),
     path('probar', views.test, name='test'),
     path('onDriver', views.activateDriver, name='onDriver'),
     path('getPosts', views.getContent, name='getContent'),
-    path('getUrl/<str:href>', views.get_url, name='getUrl'),
-    path('file', views.file, name='file')
+    path('findPost', views.find_post, name='findPost'),
+    path('getUrl/<str:href>', views.get_url, name='getUrl')
 
 ]
 

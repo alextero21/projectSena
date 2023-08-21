@@ -146,23 +146,77 @@ $(document).ready(function () {
           `
         }       
 
+
+
         card.html(template_card)
 
-        $(".list-group-item a").click(function (e) { 
+        $(".list-group-item a").click(function (e) {//Este es cuando se abre el post 
           // e.preventDefault();
           
           var dataInfo = $(this).data('info')
+          var tarea_id = $(this).data('tarea-id')
           
           $("#teacher_title").html('<span class="title_card">Profesor: </span>'+dataInfo.profesor)
           $("#work_title").html('<span class="title_card">Materia: </span>'+dataInfo.materia)
           
-          $("#btn_send_evidence").data('tarea-id', $(this).data('tarea-id'));
+          $("#sendImage").data('tarea-id', tarea_id);
+          
         });
 
-        $("#btn_send_evidence").click(function (e) { 
+
+
+        var selectedFiles = [];
+        $("#file").change(function() {
+          var fileInput = this;
+          for (var i = 0; i < fileInput.files.length; i++) {
+            selectedFiles.push(fileInput.files[i]);
+          }
+        });
+
+
+
+        $("#sendImage").click(function (e) { 
           // e.preventDefault();
+          var url_vinculo=$("#vinculo").val()
           var id_tarea=$(this).data('tarea-id')
+
+          var formData = new FormData();
+
+          if (selectedFiles.length > 0) {
+            for (var i = 0; i < selectedFiles.length; i++) {
+              formData.append("files[]", selectedFiles[i]);
+            }
+          }else if(selectedFiles.length == 0){
+            formData.append("files[]", selectedFiles[0]);
+          }
+
+          formData.append("vinculo",url_vinculo)
+          formData.append("tarea_id",id_tarea)
+
+          var csrfToken = $('[name=csrfmiddlewaretoken]').val();
+          $.ajax({
+            url: "/findPost",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            beforeSend: function(xhr) {
+              // Agregar el token CSRF a la cabecera de la solicitud
+              xhr.setRequestHeader('X-CSRFToken', csrfToken);
+            },
+            success: function(response) {
+              console.log("Éxito:", response);
+            },
+            error: function(error) {
+              console.log("Error:", error);
+            }
+          });
+
+          
+          
           console.log(id_tarea);
+          console.log(url_vinculo);
+          console.log(selectedFiles);
         });
 
 

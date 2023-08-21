@@ -22,6 +22,7 @@ from django.conf import settings
 
 global_driver = None
 url = 'https://sena.territorio.la/'
+url_perfil_id = 'perfil.php?id=31247202'
 # Ruta al controlador ChromeDriver
 # chrome_driver_path = 'C:\dchrome\chromedriver.exe'  # (o .exe en Windows)
 
@@ -40,7 +41,7 @@ def initialize_driver():
 
 
 
-def login(request):
+def login(request):#La pagina mia
 
     return render(request, 'login.html')
 
@@ -98,8 +99,82 @@ def activateDriver(request):#ESTE NOOOOO
         global_driver.get(url + 'index.php?login=true')
     
         return JsonResponse({'status':200, 'message':'Abriendo controlador'})
+
+@csrf_protect            
+def find_post(request):
+
+    global global_driver
+    
+    if global_driver and is_driver_active(global_driver):
+
+        if request.POST.get('tarea_id'):
+
+            tarea_id=request.POST.get('tarea_id')
+
+            # AQUI COMIENZA EL PERFIL
             
+            # Se da clic en evidencias
+            # http://sena.territorio.la/tarea_tt.php?tarea=479413805
+            global_driver.get(url+'tarea_tt.php?tarea='+str(tarea_id))
+    
+            if request.POST.get('vinculo') or request.FILES.getlist('files[]'):#Estos REQUEST son obtenidos de mi pagina interfaz
+
+                if request.FILES.getlist('files[]'):
+                    archivos = request.FILES.getlist('files[]')
+
+                    wait = WebDriverWait(global_driver, 10)
+
+                    # Encuentra el elemento de entrada de archivo (input type="file") por su atributo "name" o "id"
+   
+                    archivo_ruta = []  # Inicializa la lista para las rutas de los archivos
+
+                    for archivo in archivos:
+                        # Aquí puedes acceder a los datos del archivo, por ejemplo:
             
+                        # Guarda el archivo en el sistema de archivos (por ejemplo, en el directorio "uploads")
+                        archivo_path = default_storage.save(f"{archivo.name}", archivo)
+                        
+                        # Convierte la ruta relativa a absoluta
+                        archivo_path_abs = os.path.abspath("uploads/"+archivo_path)
+
+                        archivo_ruta.append(archivo_path_abs)
+
+                    
+                    input_archivo = wait.until(EC.presence_of_element_located((By.ID, "file")))
+
+                    # Agrega la ruta del archivo a la lista
+                    input_archivo.send_keys("\n".join(archivo_ruta))
+                    
+
+                #Si se ha typeado un vinculo, entonces se activa el find_element
+                if request.POST.get('vinculo'):
+                    text_vinculo = request.POST.get('vinculo')
+                    contentSena= global_driver.find_element(By.XPATH, '//*[@id="divVinculosRespuesta"]/a')
+                    contentSena.click()
+                    input_vinculo = global_driver.find_element(By.ID, "linktare")
+                    input_vinculo.send_keys(text_vinculo)    
+                
+                # Cuando esté todo ok, se procede a activar el boton de abajo!
+                # boton_enviar = global_driver.find_element(By.XPATH, "//*[@id='contestarTareaBoton']")
+                # boton_enviar.click()
+
+
+
+
+            
+            return JsonResponse({'status':200, 'data':tarea_id})
+        
+        else:
+            return JsonResponse({'status': 400, 'message': 'ERROR2'})
+
+    else:
+        # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
+        # global_driver = initialize_driver()
+        # global_driver.get(url + 'index.php?login=true')
+
+        return JsonResponse({'status': 400, 'message': 'ERROR DEL BUENO'})
+
+    
 
 
 
@@ -126,9 +201,12 @@ def home(request):
     
     else:
             # Código para manejar el inicio de sesión fallido
-        return render(request, 'upload.html')
-        
-        # return render(request, 'home.html',{'content':'123'})
+        # return render(request, 'upload.html')
+        # return JsonResponse({'status':200, 'message':'Excelente','url':'test'})
+        global_driver = initialize_driver()
+        global_driver.get(url + 'index.php?login=true')
+
+        return render(request, 'home.html',{'content':'123'})
 
     # return HttpResponseRedirect('/login')
 
@@ -141,76 +219,6 @@ def get_url(request,href):
         return JsonResponse({'status':200, 'message':'Excelente','url':'test'})
     else:
       return JsonResponse({'status':404, 'message':'Error en el navegador','url':'home'})
-
-@csrf_protect
-def testing(request):
-    global global_driver
-
-    if global_driver and is_driver_active(global_driver):
-        # Continuar interactuando con el navegador ya abierto
-        # Abrir la página que contiene el formulario para subir archivos
-        global_driver.get("http://localhost:8000/file")
-
-        if request.POST.get('vinculo') or  request.FILES.getlist('files[]'):
-
-            if request.FILES.getlist('files[]'):
-                wait = WebDriverWait(global_driver, 10)
-                archivos = request.FILES.getlist('files[]')
-            
-
-                archivo_ruta = []  # Inicializa la lista para las rutas de los archivos
-                
-                for archivo in archivos:
-                    # Aquí puedes acceder a los datos del archivo, por ejemplo:
-        
-                    # Guarda el archivo en el sistema de archivos (por ejemplo, en el directorio "uploads")
-                    archivo_path = default_storage.save(f"{archivo.name}", archivo)
-                    
-                    # Convierte la ruta relativa a absoluta
-                    archivo_path_abs = os.path.abspath("uploads/"+archivo_path)
-
-                    archivo_ruta.append(archivo_path_abs)
-
-                    
-
-                # Envía las rutas de los archivos al elemento input
-                # ruta1="http://localhost:8000/uploads/banco.png"
-                # ruta2="C:/Users/TeamAdenel/Music/projectSena/my_app/uploads/banco.png"
-
-
-                # Encuentra el elemento de entrada de archivo (input type="file") por su atributo "name" o "id"
-                input_archivo = wait.until(EC.presence_of_element_located((By.ID, "file")))
-                
-                
-
-                # Agrega la ruta del archivo a la lista
-                input_archivo.send_keys("\n".join(archivo_ruta))
-                #Si se ha typeado un vinculo, entonces se activa el find_element
-
-            if request.POST.get('vinculo'):
-                text_vinculo = request.POST.get('vinculo')
-                contentSena= global_driver.find_element(By.XPATH, '//*[@id="divVinculosRespuesta"]/a')
-                contentSena.click()
-                input_vinculo = global_driver.find_element(By.ID, "linktare")
-                input_vinculo.send_keys(text_vinculo)
-
-            boton_enviar = global_driver.find_element(By.XPATH, "//*[@id='contestarTareaBoton']")
-
-            boton_enviar.click()
-
-
-
-    
-        
-           
-        return JsonResponse({'status':200, 'message':'Éxito','url':'home'})
-          
-    else:
-        # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
-        global_driver = initialize_driver()
-        global_driver.get("http://localhost:8000/file")
-    
-        return render(request, 'nowUpload.html')#la pagina mia prinicipal para enviar a territorium las imagenes
 
 @csrf_protect
 def test(request):
@@ -269,16 +277,16 @@ def test(request):
                 "Derechos fundamentales",
             ],
             "id_tarea": [
-                "407906363",
-                "417537368",
-                "422906362",
-                "437901363",
-                "447271362",
-                "447802361",
-                "457909361",
-                "467908360",
-                "477908365",
-                "487907362",
+                "483078840",
+                "479413805",
+                "476003090",
+                "472620361",
+                "470634816",
+                "468648314",
+                "464688279",
+                "459774401",
+                "456193106",
+                "452513904",
                 "497907367",
             ],
             "date_end": [
@@ -328,28 +336,6 @@ def test(request):
     # return render(request, 'test.html')
     return JsonResponse({'data': data})
 
-
-def file(request):
-    # print(request)
-    if request.method == 'POST':#Cuando se da clic para las imagenes en territorium "
-        archivos = request.FILES.getlist('files[]')
-        textoData = request.POST.get('textData')
-        
-
-        for archivo in archivos:
-            # Aquí puedes acceder a los datos del archivo, por ejemplo:
-            nombre_archivo = archivo.name
-            contenido_archivo = archivo.read()
-            print('Nombre de: ',nombre_archivo)
-            # print(contenido_archivo)
-        print(textoData)
-        print('TENGO LO MIO')
-        return JsonResponse({'status':200})
-    else:
-        # print('TODAVIA NO HAY POST')
-        return render(request, 'upload.html')#la pagina de territorium "
-
-    
 
 def getContent(request):
 

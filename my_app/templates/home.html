@@ -94,12 +94,19 @@
     
           <div class="input-group mb-3">
             <label class="input-group-text" for="inputGroupFile01"><i class="fa-solid fa-paperclip"></i></label>
-            <input type="file" class="form-control" id="inputGroupFile01">
+            <input type="file" class="form-control" id="file" name="file" multiple>
+          </div>
+
+          <div class="mb-3">
+            <div class="input-group">
+              <span class="input-group-text" id="basic-addon3">https://www.ejemplo.com/</span>
+              <input type="text" placeholder="Adjuntar vinculo (Opcional)" name="vinculo" class="form-control" id="vinculo" aria-describedby="basic-addon3 basic-addon4">
+            </div>
           </div>
 
           <div class="input-group">
             <textarea class="form-control" aria-label="With textarea" placeholder="Algun dato o informacion para el profe (Opcional)"></textarea>
-            <button type="button" class="btn btn-outline-primary" id="btn_send_evidence">Enviar</button>
+            <button type="button" class="btn btn-outline-primary" id="sendImage">Enviar</button>
             <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
               <span class="visually-hidden">Toggle Dropdown</span>
             </button>
