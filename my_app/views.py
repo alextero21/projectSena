@@ -9,6 +9,10 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
 import time
 from selenium.webdriver.support import expected_conditions as EC
@@ -21,6 +25,8 @@ import os
 import re
 from django.conf import settings
 from selenium.common.exceptions import TimeoutException
+from difflib import get_close_matches
+
 
 global_driver = None
 url = 'https://sena.territorio.la/'
@@ -32,10 +38,50 @@ url_perfil_id = 'perfil.php?id=31247202'
 
 import time
 
+def findSubjectsByTeacher(teacher_name):
+        profesor_materia = {
+        "MARIA ELENA MONTUFAR MUÑOZ": "ASESORAR CONSUMIDOR FINANCIERO",
+        "ALEX FERNANDO LOPEZ": "AMBIENTAL Y SST",
+        "JAIME MAURICIO CRUZ": "UTILIZAR HERRAMIENTAS OFIMATICAS",
+        "NAZLY YULIANA BENJUMEA BECERRA": "INGLÉS",
+        "DANIEL DOMINGUEZ CABAL": "ÉTICA",
+        "ISABEL VALENCIA PUENTES": "COMUNICACIONES",
+        "YULIETH JARAMILLO OSPINA": "RAZONAMIENTO CUANTITATIVO",
+        "EDGAR DE JESUS ARENAS VARGAS": "MANEJAR RECURSOS FINANCIEROS",
+        "JORGE ELIECER VERA TASAMA": "DERECHOS FUNDAMENTALES",
+        "HERMINSUL VALLES ESPINOSA": "CULTURA FÍSICA",
+        }
+
+        # nombre_profesor_buscado = "MARIA LENA MONTUFAR"
+
+        # Buscar la coincidencia más cercana usando la función get_close_matches
+        matches = get_close_matches(teacher_name.upper(), profesor_materia.keys(), n=1, cutoff=0.6)
+
+        if matches:
+            profesor_mas_similar = matches[0]
+            materia_correspondiente = profesor_materia[profesor_mas_similar]
+            # print(f"¿Quisiste decir '{profesor_mas_similar}'?")
+            # print(f"La materia es: {materia_correspondiente}")
+        else:
+            # print(f"No se encontró un profesor similar a '{teacher_name}'")
+            materia_correspondiente= False
+            
+        return materia_correspondiente
+
+
 def initialize_driver():
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option("detach", True)
-    return webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
+    # Ruta al ejecutable del controlador Chrome
+    driver_path = 'C:\dchrome\chromedriver.exe'
+
+    # Configurar opciones del controlador Chrome
+    chrome_options = Options()
+    # chrome_options.add_argument('--headless')  # Ejecución en segundo plano
+
+    # Crear instancia del servicio del controlador
+    service = Service(executable_path=driver_path)
+
+    # Crear instancia del controlador Chrome
+    return webdriver.Chrome(service=service, options=chrome_options)
 
 def login(request):#La pagina mia
 
@@ -236,6 +282,15 @@ def test(request):
             numero_tarea = div_element.get_attribute("id").replace("tarea[", "").replace("]", "")#//*[@id="divInformacionTarea"]
             numeros_tarea.append(numero_tarea)#divInformacionTarea
 
+        #Datos de todos los post
+        data_id_tareas = []
+        data_nombreProfesor = []
+        data_FechaTareas = []
+        data_content = []
+        data_subjects = []
+        data_isHomework = []
+        caca = []
+
         for tareas_num in numeros_tarea:
             time.sleep(1) 
             global_driver.get(url+'tarea_tt.php?tarea='+str(tareas_num))
@@ -248,15 +303,54 @@ def test(request):
 
             # Obtener el valor de FechaTarea
             fecha_tarea = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTarea"]').text
+            nombre_profesor = divInformacionTarea.find_element(By.XPATH, '//*[@id="divInformacionTarea"]/table/tbody/tr/td[2]/span[5]/strong').text
 
             # Obtener el texto de ConTare
             ConTituloBtc = divInformacionTarea.find_element(By.ID, 'ConTituloBtc').text
             con_tare_texto = divInformacionTarea.find_element(By.ID, 'ConTare').text
 
-            print(ConTituloBtc)
-            print(con_tare_texto)
-            print(fecha_tarea_inicio)
-            print(fecha_tarea)
+            try:
+
+                if divInformacionTarea.find_element(By.XPATH, '//*[@id="post_load"]').text != "":
+                    hay_tareas=True
+                else:
+                    hay_tareas=False
+                
+            except:
+                hay_tareas=False
+
+            data_id_tareas.append(tareas_num)
+            data_nombreProfesor.append(nombre_profesor)
+            data_FechaTareas.append(fecha_tarea)
+            data_content.append(ConTituloBtc+': '+con_tare_texto)
+            data_subjects.append(findSubjectsByTeacher(nombre_profesor))
+            data_isHomework.append(str(hay_tareas))
+
+            AllData_evidence = []
+            for idtareas in data_id_tareas:
+
+                evidence = [
+                    {
+                        "id_classroom": id_clase,
+                        "classroom": "Técnico en Servicios Comerciales y Financieros",
+                        "status": 200,
+                        "materia": data_subjects,
+                        "id_tarea": idtareas,
+                        "didHomework": data_isHomework,
+                        "date_end": data_FechaTareas,
+                        "names": data_nombreProfesor,
+                        "content": data_content
+                    
+                    }
+                ]
+                AllData_evidence.append(evidence)
+            print(AllData_evidence)#Aqui se muestra todos los array almacenados    
+            
+
+            # return JsonResponse(AllData_evidence)#AQUI ESTÁ EL ERROR
+        
+
+
 
            
 
@@ -274,7 +368,7 @@ def test(request):
         #https://sena.territorio.la/tareas.php?clase=2776992
 
 
-        return JsonResponse({'id_classroom':'2776992','status': 200})
+        # return JsonResponse({'id_classroom':'2776992','status': 200})
 
     else:
             # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
@@ -287,116 +381,116 @@ def test(request):
 
 
 
-    data = [       {
-            "id_classroom": "6726881",
-            "classroom": "Inglés",
-            "status": 200,
-            "materia": [
-                "Inglés",
-                "Inglés",
-                "Inglés",
-            ],
-            "id_tarea": [
-                "400126367",
-                "468567762",
-                "449956361",
-            ],
-            "date_end": [
-                "Fecha de entrega: 2023-07-30 23:30:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-08-04 23:30:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-08-12 14:45:00\nArchivos:\nResponder Evidencia",
-            ],
-            "names": [
-                "EIKA YILIETH PEREZ",
-                "EIKA YILIETH PEREZ",
-                "EIKA YILIETH PEREZ",
+#     data = [       {
+#             "id_classroom": "6726881",
+#             "classroom": "Inglés",
+#             "status": 200,
+#             "materia": [
+#                 "Inglés",
+#                 "Inglés",
+#                 "Inglés",
+#             ],
+#             "id_tarea": [
+#                 "400126367",
+#                 "468567762",
+#                 "449956361",
+#             ],
+#             "date_end": [
+#                 "Fecha de entrega: 2023-07-30 23:30:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-08-04 23:30:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-08-12 14:45:00\nArchivos:\nResponder Evidencia",
+#             ],
+#             "names": [
+#                 "EIKA YILIETH PEREZ",
+#                 "EIKA YILIETH PEREZ",
+#                 "EIKA YILIETH PEREZ",
 
-            ],
-            "content": [
-                "Buenas tardes. Por favor subir la actividad desarrollada en el ambiente de aprendizaje",
-                "Subir la tarea de ingles que si no sabes es esta que te voy a mostrar a continuacion",
-                "Los dibujos didacticos que te di tienen que ser diferentes y por eso el grupo debe de saber cual es",
+#             ],
+#             "content": [
+#                 "Buenas tardes. Por favor subir la actividad desarrollada en el ambiente de aprendizaje",
+#                 "Subir la tarea de ingles que si no sabes es esta que te voy a mostrar a continuacion",
+#                 "Los dibujos didacticos que te di tienen que ser diferentes y por eso el grupo debe de saber cual es",
                 
-            ]
+#             ]
                 
-        },
+#         },
 
-        {    
-            "id_classroom": "2776992",
-            "classroom": "Técnico en Servicios Comerciales y Financieros",
-            "status": 200,
-            "materia": [
-                "Asesorar consumidor Financiero",
-                "Derechos fundamentales",
-                "Derechos fundamentales",
-                "Derechos fundamentales",
-                "Razonamiento cuantitativo",
-                "Derechos fundamentales",
-                "Manejar Recursos Financieros",
-                "Derechos fundamentales",
-                "Derechos fundamentales",
-                "Derechos fundamentales",
-                "Derechos fundamentales",
-            ],
-            "id_tarea": [
-                "483078840",
-                "479413805",
-                "476003090",
-                "472620361",
-                "470634816",
-                "468648314",
-                "464688279",
-                "459774401",
-                "456193106",
-                "452513904",
-                "497907367",
-            ],
-            "date_end": [
-                "Fecha de entrega: 2023-08-12 14:45:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-08-04 23:30:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-07-30 23:30:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-07-26 13:00:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-07-21 11:42:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-07-16 23:30:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-07-26 23:30:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-07-07 23:30:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-06-24 23:30:00\nArchivos:\nTRABAJOnYnCIUDADANnnA.mp4\nCARTILLAnEMPLEOnRETORNOnopn3ncompletonbajan11n10n2017.pdf\nResponder Evidencia",
-                "Fecha de entrega: 2023-06-19 23:30:00\nArchivos:\nResponder Evidencia",
-                "Fecha de entrega: 2023-06-13 23:30:00\nArchivos:\nResponder Evidencia"
-            ],
-            "names": [
-                "MARIA ELENA MONTUFAR MUÑOZ",
-                "JORGE ELIECER VERA TASAMA",
-                "JORGE ELIECER VERA TASAMA",
-                "JORGE ELIECER VERA TASAMA",
-                "YULIETH JARAMILLO OSPINA",
-                "JORGE ELIECER VERA TASAMA",
-                "EDGAR DE JESUS ARENAS VARGAS",
-                "JORGE ELIECER VERA TASAMA",
-                "JORGE ELIECER VERA TASAMA",
-                "JORGE ELIECER VERA TASAMA",
-                "JORGE ELIECER VERA TASAMA"
-            ],
-            "content": [
-                "Buenas tardes. Por favor subir la actividad desarrollada en el ambiente de aprendizaje",
-                "   RAP:     Participar en acciones solidarias   D F T -Espacio para carga de la evidencia 2 Guía 4 Derechos Fundamentales-Los DESC     Apreciado Aprendiz   Se activa el espacio para la carga de evidencia 2 correspondiente a la guía 4 Actividad 2   Evidencia a cargar:  “Derechos económicos sociales y culturales” ",
-                " RAP: Participar en acciones solidarias teniendo en cuenta el ejercicio de los derechos humanos, de los pueblos y de la naturaleza.   Apreciad@ Aprendiz   Se activa el espacio para la carga de evidencia1 correspondiente a la guía 4 Actividad 1   Evidencia a cargar:  “Estado social de derecho y la desprotección legal ” ",
-                "        RAP: Practicar los derechos fundamentales en el trabajo   Asunto: E D F T y C L -Espacio para carga de la evidencia 2 Guía 3 - Herramientas Jurídicas para reclamar el derecho- Derechos Fundamentales   Apreciado Aprendiz Se activa el espacio para la carga de evidencias correspondiente a la guía 3 Actividad 2   Evidencia por cargar: “Herramientas Jurídicas para reclamar el derecho ”   ",
-                " Aquí enviaras los talleres de: -Figuras geométricas áreas, perímetros y volúmenes - Teorema de Pitágoras - Funciones Trigonométricas, en total son 3 archivos para enviar como evidencia de tu trabajo en clase. ",
-                "   RAP: Practicar los derechos fundamentales en el trabajo de acuerdo con la Constitución Política y los Convenios Internacionales.   Apreciado Aprendiz Se activa el espacio para la carga de evidencias correspondiente a la guía 3 Actividad 1   Evidencia por cargar: “artículos constitucionales relacionados con los derechos del trabajador” ",
-                " Elaborar un guion escrito para realizar una simulación donde se identifiquen las características, los tipos de servicios, las tarifas y condiciones del proceso vistos durante la guía. La simulación se realizará en clase para presentar a sus compañeros e instructor. ",
-                " RAP: Valorar la importancia de la ciudadanía laboral Apreciado Aprendiz Se activa el espacio para la carga de evidencia 2- Derecho colectivo del trabajo- correspondiente a la guía 2 Actividad 2.   Producto evidencia a cargar: “Derecho laboral colectivo” ",
-                " RAP: Valorar la importancia de la ciudadanía laboral Apreciado Aprendiz Se activa el espacio para la carga de evidencia 1 correspondiente a la guía 2 Actividad 1. Producto evidencia a cargar: Derecho laboral individual y Ciudadanía Laboral. Recordar que el producto debe socializarse. ",
-                " RAP: Reconocer el trabajo como factor de movilidad social Apreciado Aprendiz Se activa el espacio para la carga de evidencias 2-Actividad 2 correspondiente a la guía 1. Evidencia por cargar: “La Dignidad Humana y Cambios en el Mundo del Trabajo” ",
-                " RAP1: Reconocer el trabajo como factor de movilidad social y transformación vital, con referencia a la fenomenología y a los derechos fundamentales en el trabajo. Apreciado Aprendiz Se activa el espacio para la carga de evidencia 1 correspondiente a la guía 1. Evidencia a cargar: “Evolución del trabajo y su fenomenología” “FUNDAMENTOS DE ECONOMIA”  "
-            ]
+#         {    
+#             "id_classroom": "2776992",
+#             "classroom": "Técnico en Servicios Comerciales y Financieros",
+#             "status": 200,
+#             "materia": [
+#                 "Asesorar consumidor Financiero",
+#                 "Derechos fundamentales",
+#                 "Derechos fundamentales",
+#                 "Derechos fundamentales",
+#                 "Razonamiento cuantitativo",
+#                 "Derechos fundamentales",
+#                 "Manejar Recursos Financieros",
+#                 "Derechos fundamentales",
+#                 "Derechos fundamentales",
+#                 "Derechos fundamentales",
+#                 "Derechos fundamentales",
+#             ],
+#             "id_tarea": [
+#                 "483078840",
+#                 "479413805",
+#                 "476003090",
+#                 "472620361",
+#                 "470634816",
+#                 "468648314",
+#                 "464688279",
+#                 "459774401",
+#                 "456193106",
+#                 "452513904",
+#                 "497907367",
+#             ],
+#             "date_end": [
+#                 "Fecha de entrega: 2023-08-12 14:45:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-08-04 23:30:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-07-30 23:30:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-07-26 13:00:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-07-21 11:42:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-07-16 23:30:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-07-26 23:30:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-07-07 23:30:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-06-24 23:30:00\nArchivos:\nTRABAJOnYnCIUDADANnnA.mp4\nCARTILLAnEMPLEOnRETORNOnopn3ncompletonbajan11n10n2017.pdf\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-06-19 23:30:00\nArchivos:\nResponder Evidencia",
+#                 "Fecha de entrega: 2023-06-13 23:30:00\nArchivos:\nResponder Evidencia"
+#             ],
+#             "names": [
+#                 "MARIA ELENA MONTUFAR MUÑOZ",
+#                 "JORGE ELIECER VERA TASAMA",
+#                 "JORGE ELIECER VERA TASAMA",
+#                 "JORGE ELIECER VERA TASAMA",
+#                 "YULIETH JARAMILLO OSPINA",
+#                 "JORGE ELIECER VERA TASAMA",
+#                 "EDGAR DE JESUS ARENAS VARGAS",
+#                 "JORGE ELIECER VERA TASAMA",
+#                 "JORGE ELIECER VERA TASAMA",
+#                 "JORGE ELIECER VERA TASAMA",
+#                 "JORGE ELIECER VERA TASAMA"
+#             ],
+#             "content": [
+#                 "Buenas tardes. Por favor subir la actividad desarrollada en el ambiente de aprendizaje",
+#                 "   RAP:     Participar en acciones solidarias   D F T -Espacio para carga de la evidencia 2 Guía 4 Derechos Fundamentales-Los DESC     Apreciado Aprendiz   Se activa el espacio para la carga de evidencia 2 correspondiente a la guía 4 Actividad 2   Evidencia a cargar:  “Derechos económicos sociales y culturales” ",
+#                 " RAP: Participar en acciones solidarias teniendo en cuenta el ejercicio de los derechos humanos, de los pueblos y de la naturaleza.   Apreciad@ Aprendiz   Se activa el espacio para la carga de evidencia1 correspondiente a la guía 4 Actividad 1   Evidencia a cargar:  “Estado social de derecho y la desprotección legal ” ",
+#                 "        RAP: Practicar los derechos fundamentales en el trabajo   Asunto: E D F T y C L -Espacio para carga de la evidencia 2 Guía 3 - Herramientas Jurídicas para reclamar el derecho- Derechos Fundamentales   Apreciado Aprendiz Se activa el espacio para la carga de evidencias correspondiente a la guía 3 Actividad 2   Evidencia por cargar: “Herramientas Jurídicas para reclamar el derecho ”   ",
+#                 " Aquí enviaras los talleres de: -Figuras geométricas áreas, perímetros y volúmenes - Teorema de Pitágoras - Funciones Trigonométricas, en total son 3 archivos para enviar como evidencia de tu trabajo en clase. ",
+#                 "   RAP: Practicar los derechos fundamentales en el trabajo de acuerdo con la Constitución Política y los Convenios Internacionales.   Apreciado Aprendiz Se activa el espacio para la carga de evidencias correspondiente a la guía 3 Actividad 1   Evidencia por cargar: “artículos constitucionales relacionados con los derechos del trabajador” ",
+#                 " Elaborar un guion escrito para realizar una simulación donde se identifiquen las características, los tipos de servicios, las tarifas y condiciones del proceso vistos durante la guía. La simulación se realizará en clase para presentar a sus compañeros e instructor. ",
+#                 " RAP: Valorar la importancia de la ciudadanía laboral Apreciado Aprendiz Se activa el espacio para la carga de evidencia 2- Derecho colectivo del trabajo- correspondiente a la guía 2 Actividad 2.   Producto evidencia a cargar: “Derecho laboral colectivo” ",
+#                 " RAP: Valorar la importancia de la ciudadanía laboral Apreciado Aprendiz Se activa el espacio para la carga de evidencia 1 correspondiente a la guía 2 Actividad 1. Producto evidencia a cargar: Derecho laboral individual y Ciudadanía Laboral. Recordar que el producto debe socializarse. ",
+#                 " RAP: Reconocer el trabajo como factor de movilidad social Apreciado Aprendiz Se activa el espacio para la carga de evidencias 2-Actividad 2 correspondiente a la guía 1. Evidencia por cargar: “La Dignidad Humana y Cambios en el Mundo del Trabajo” ",
+#                 " RAP1: Reconocer el trabajo como factor de movilidad social y transformación vital, con referencia a la fenomenología y a los derechos fundamentales en el trabajo. Apreciado Aprendiz Se activa el espacio para la carga de evidencia 1 correspondiente a la guía 1. Evidencia a cargar: “Evolución del trabajo y su fenomenología” “FUNDAMENTOS DE ECONOMIA”  "
+#             ]
                 
-        }
-]
+#         }
+# ]
 
 
-    # return render(request, 'test.html')
-    return JsonResponse({'data': data})
+#     # return render(request, 'test.html')
+#     return JsonResponse({'data': data})
 
 
 def getContent(request):
