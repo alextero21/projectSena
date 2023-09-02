@@ -69,6 +69,11 @@ TEMPLATES = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "sesame.backends.ModelBackend",
+]
+
 WSGI_APPLICATION = 'senal.wsgi.application'
 
 
@@ -112,6 +117,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+SESAME_MAX_AGE = 30
 
 
 # Static files (CSS, JavaScript, Images)

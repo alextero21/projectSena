@@ -9,7 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
-from channels.layers import get_channel_layer
+# from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json
 from selenium.webdriver.chrome.options import Options
@@ -267,87 +267,169 @@ def test(request):
 
     if global_driver and is_driver_active(global_driver):
             
-        # AQUI COMIENZA EL MURO
-        global_driver.get(url+'tareas.php?clase='+id_clase)
-        # nombres_elements = global_driver.find_element(By.ID, "divContentListaTareas")
-        # Esperar a que el elemento esté presente en la página
-        wait = WebDriverWait(global_driver, 10)
-        div_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="divContentListaTareas"]/div[starts-with(@id, "tarea")]')))
+        
 
-        # Lista para almacenar los números de tarea
-        numeros_tarea = []
-
-        # Iterar a través de los elementos div
-        for div_element in div_elements:
-            numero_tarea = div_element.get_attribute("id").replace("tarea[", "").replace("]", "")#//*[@id="divInformacionTarea"]
-            numeros_tarea.append(numero_tarea)#divInformacionTarea
-
-        #Datos de todos los post
-        data_id_tareas = []
-        data_nombreProfesor = []
-        data_FechaTareas = []
-        data_content = []
-        data_subjects = []
-        data_isHomework = []
-        caca = []
-
-        for tareas_num in numeros_tarea:
-            time.sleep(1) 
-            global_driver.get(url+'tarea_tt.php?tarea='+str(tareas_num))
+        if request.POST.getlist('request') and request.POST.getlist('id_tareas'):
+            # print(request.POST.getlist('id_tareas'))
+            # print(numeros_tarea)
             
-            wait = WebDriverWait(global_driver, 10)
-            divInformacionTarea = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divInformacionTarea"]')))#//*[@id="FechaTareaInicio"]
+            listNumber = request.POST.getlist('id_tareas')  # Obtener el valor como lista
+            indexTarea = int(listNumber[0]) if listNumber else None  # Obtener el primer elemento de la lista y convertirlo a entero
+            if(isinstance(indexTarea,int)):
+                time.sleep(1) 
+                global_driver.get(url+'tarea_tt.php?tarea='+str(indexTarea))
             
-            # Obtener el valor de FechaTareaInicio
-            fecha_tarea_inicio = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTareaInicio"]').text
-
-            # Obtener el valor de FechaTarea
-            fecha_tarea = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTarea"]').text
-            nombre_profesor = divInformacionTarea.find_element(By.XPATH, '//*[@id="divInformacionTarea"]/table/tbody/tr/td[2]/span[5]/strong').text
-
-            # Obtener el texto de ConTare
-            ConTituloBtc = divInformacionTarea.find_element(By.ID, 'ConTituloBtc').text
-            con_tare_texto = divInformacionTarea.find_element(By.ID, 'ConTare').text
-
-            try:
-
-                if divInformacionTarea.find_element(By.XPATH, '//*[@id="post_load"]').text != "":
-                    hay_tareas=True
-                else:
-                    hay_tareas=False
+                wait = WebDriverWait(global_driver, 10)
+                divInformacionTarea = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divInformacionTarea"]')))#//*[@id="FechaTareaInicio"]
                 
-            except:
-                hay_tareas=False
+                # Obtener el valor de FechaTareaInicio
+                fecha_tarea_inicio = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTareaInicio"]').text
+                
+                # Obtener el valor de FechaTarea
+                fecha_tarea = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTarea"]').text
+                nombre_profesor = divInformacionTarea.find_element(By.XPATH, '//*[@id="divInformacionTarea"]/table/tbody/tr/td[2]/span[5]/strong').text
 
-            data_id_tareas.append(tareas_num)
-            data_nombreProfesor.append(nombre_profesor)
-            data_FechaTareas.append(fecha_tarea)
-            data_content.append(ConTituloBtc+': '+con_tare_texto)
-            data_subjects.append(findSubjectsByTeacher(nombre_profesor))
-            data_isHomework.append(str(hay_tareas))
+                # Obtener el texto de ConTare
+                ConTituloBtc = divInformacionTarea.find_element(By.ID, 'ConTituloBtc').text
+                con_tare_texto = divInformacionTarea.find_element(By.ID, 'ConTare').text
 
-            AllData_evidence = []
-            for idtareas in data_id_tareas:
+                #Datos de todos los post
+                data_id_tareas = []
+                data_nombreProfesor = []
+                data_FechaTareas = []
+                data_content = []
+                data_subjects = []
+                data_isHomework = []
+
+                try:
+
+                    if divInformacionTarea.find_element(By.XPATH, '//*[@id="post_load"]').text != "":
+                        hay_tareas=True
+                    else:
+                        hay_tareas=False
+                    
+                except:
+                    hay_tareas=False
+
+                    
+
+                # data_id_tareas.append(indexTarea)
+                # data_nombreProfesor.append(nombre_profesor)
+                # data_FechaTareas.append(fecha_tarea)
+                # data_content.append(ConTituloBtc+': '+con_tare_texto)
+                # data_subjects.append(findSubjectsByTeacher(nombre_profesor))
+                # data_isHomework.append(str(hay_tareas))
+
+                # AllData_evidence = []
+                # for idtareas in data_id_tareas:
 
                 evidence = [
                     {
                         "id_classroom": id_clase,
                         "classroom": "Técnico en Servicios Comerciales y Financieros",
                         "status": 200,
-                        "materia": data_subjects,
-                        "id_tarea": idtareas,
-                        "didHomework": data_isHomework,
-                        "date_end": data_FechaTareas,
-                        "names": data_nombreProfesor,
-                        "content": data_content
+                        "materia": findSubjectsByTeacher(nombre_profesor),
+                        "id_tarea": indexTarea,
+                        "didHomework": str(hay_tareas),
+                        "date_end": fecha_tarea,
+                        "names": nombre_profesor,
+                        "content": ConTituloBtc+': '+con_tare_texto
                     
                     }
                 ]
-                AllData_evidence.append(evidence)
-            print(AllData_evidence)#Aqui se muestra todos los array almacenados    
+                # AllData_evidence.append(evidence)
+
+                # print(AllData_evidence)
+                # print('----------------------------')
+                # print(nombre_profesor)
+
+                   
+
+            return JsonResponse({'numeros_tarea':2,'data_evidence': evidence})   
+        
+        else:
+            # AQUI COMIENZA EL MURO
+            global_driver.get(url+'tareas.php?clase='+id_clase)
+            # Esperar a que el elemento esté presente en la página
+            wait = WebDriverWait(global_driver, 10)
+            div_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="divContentListaTareas"]/div[starts-with(@id, "tarea")]')))
+
+            # Lista para almacenar los números de tarea
+            numeros_tarea = []
+
+            # Iterar a través de los elementos div
+            for div_element in div_elements:
+                numero_tarea = div_element.get_attribute("id").replace("tarea[", "").replace("]", "")
+                numeros_tarea.append(numero_tarea)
+
+            return JsonResponse({'numeros_tarea':len(numeros_tarea),'id_tareas': numeros_tarea})   
+
+        
+    
+        # for tareas_num in numeros_tarea:
+        #     print(tareas_num)
+        #     print('-------------------')
+        #     time.sleep(1) 
+        #     global_driver.get(url+'tarea_tt.php?tarea='+str(tareas_num))
+            
+        #     wait = WebDriverWait(global_driver, 10)
+        #     divInformacionTarea = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divInformacionTarea"]')))#//*[@id="FechaTareaInicio"]
+            
+        #     # Obtener el valor de FechaTareaInicio
+        #     fecha_tarea_inicio = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTareaInicio"]').text
+
+        #     # Obtener el valor de FechaTarea
+        #     fecha_tarea = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTarea"]').text
+        #     nombre_profesor = divInformacionTarea.find_element(By.XPATH, '//*[@id="divInformacionTarea"]/table/tbody/tr/td[2]/span[5]/strong').text
+
+        #     # Obtener el texto de ConTare
+        #     ConTituloBtc = divInformacionTarea.find_element(By.ID, 'ConTituloBtc').text
+        #     con_tare_texto = divInformacionTarea.find_element(By.ID, 'ConTare').text
+
+        #     try:
+
+        #         if divInformacionTarea.find_element(By.XPATH, '//*[@id="post_load"]').text != "":
+        #             hay_tareas=True
+        #         else:
+        #             hay_tareas=False
+                
+        #     except:
+        #         hay_tareas=False
+
+        #     data_id_tareas.append(tareas_num)
+        #     data_nombreProfesor.append(nombre_profesor)
+        #     data_FechaTareas.append(fecha_tarea)
+        #     data_content.append(ConTituloBtc+': '+con_tare_texto)
+        #     data_subjects.append(findSubjectsByTeacher(nombre_profesor))
+        #     data_isHomework.append(str(hay_tareas))
+
+        #     AllData_evidence = []
+        #     for idtareas in data_id_tareas:
+
+        #         evidence = [
+        #             {
+        #                 "id_classroom": id_clase,
+        #                 "classroom": "Técnico en Servicios Comerciales y Financieros",
+        #                 "status": 200,
+        #                 "materia": data_subjects,
+        #                 "id_tarea": idtareas,
+        #                 "didHomework": data_isHomework,
+        #                 "date_end": data_FechaTareas,
+        #                 "names": data_nombreProfesor,
+        #                 "content": data_content
+                    
+        #             }
+        #         ]
+
+        #         sse_data = f"data: {json.dumps(evidence)}\n\n"
+        #         response.write(sse_data)
+        #         response.flush()
+
+        # response.write("event: done\ndata: {}\n\n")  # Indicador de que se han enviado todos los datos
+        # return response
             
 
-            # return JsonResponse(AllData_evidence)#AQUI ESTÁ EL ERROR
+
         
 
 
@@ -374,11 +456,38 @@ def test(request):
             # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
             global_driver = initialize_driver()
             global_driver.get(url + 'index.php?login=true')
+            numeros_tarea=0
+            primer_elemento=0
             
-            return JsonResponse({'status': 400, 'message': 'ERROR'})
+            return JsonResponse({'numeros_tarea':numeros_tarea,'primer': primer_elemento})
 
     #https://sena.territorio.la/tareas.php?clase=2776992
 
+@csrf_protect
+def flaka(request):
+    primer_elemento = 'NADA'
+    # print('----------------------')
+    # print(str(request.POST.get('request')))
+    # print('----------------------')
+
+    numeros_tarea=['alexis','julian','maria','paola','pedro']
+
+    if request.POST.getlist('request'):
+        
+        listNumber = request.POST.getlist('request')  # Obtener el valor como lista
+        indexTarea = int(listNumber[0]) if listNumber else None  # Obtener el primer elemento de la lista y convertirlo a entero
+        if(isinstance(indexTarea,int)):
+            primer_elemento = numeros_tarea[indexTarea]
+
+            print('-----------------------------------')
+            print(primer_elemento)
+    else:
+        primer_elemento = 'NADAs'
+
+    
+
+
+    return JsonResponse({'numeros_tarea':len(numeros_tarea),'primer': primer_elemento})
 
 
 #     data = [       {
