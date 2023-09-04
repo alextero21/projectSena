@@ -29,7 +29,6 @@ urlpatterns = [
     path('onDriver', views.activateDriver, name='onDriver'),
     path('getPosts', views.getContent, name='getContent'),
     path('findPost', views.find_post, name='findPost'),
-    path('flaka', views.flaka, name='flaka'),
     path('getUrl/<str:href>', views.get_url, name='getUrl')
 
 ]

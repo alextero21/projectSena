@@ -9,7 +9,6 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
-# from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json
 from selenium.webdriver.chrome.options import Options
@@ -152,11 +151,14 @@ def find_post(request):
         if request.POST.get('tarea_id'):
 
             tarea_id=request.POST.get('tarea_id')
+            print('tarea_id',tarea_id)
 
             # AQUI COMIENZA EL PERFIL
             
             # Se da clic en evidencias
             # http://sena.territorio.la/tarea_tt.php?tarea=479413805
+
+            
             global_driver.get(url+'tarea_tt.php?tarea='+str(tarea_id))
     
             if request.POST.get('vinculo') or request.FILES.getlist('files[]'):#Estos REQUEST son obtenidos de mi pagina interfaz
@@ -215,7 +217,7 @@ def find_post(request):
         # global_driver.get(url + 'index.php?login=true')
 
         return JsonResponse({'status': 400, 'message': 'ERROR DEL BUENO'})
-
+  
 def home(request):
 
 
@@ -266,24 +268,21 @@ def test(request):
     global global_driver
 
     if global_driver and is_driver_active(global_driver):
-            
-        
 
-        if request.POST.getlist('request') and request.POST.getlist('id_tareas'):
-            # print(request.POST.getlist('id_tareas'))
-            # print(numeros_tarea)
-            
+
+        if request.POST.getlist('id_tareas'):
             listNumber = request.POST.getlist('id_tareas')  # Obtener el valor como lista
             indexTarea = int(listNumber[0]) if listNumber else None  # Obtener el primer elemento de la lista y convertirlo a entero
             if(isinstance(indexTarea,int)):
                 time.sleep(1) 
+
                 global_driver.get(url+'tarea_tt.php?tarea='+str(indexTarea))
             
                 wait = WebDriverWait(global_driver, 10)
                 divInformacionTarea = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divInformacionTarea"]')))#//*[@id="FechaTareaInicio"]
                 
                 # Obtener el valor de FechaTareaInicio
-                fecha_tarea_inicio = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTareaInicio"]').text
+                # fecha_tarea_inicio = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTareaInicio"]').text
                 
                 # Obtener el valor de FechaTarea
                 fecha_tarea = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTarea"]').text
@@ -292,14 +291,6 @@ def test(request):
                 # Obtener el texto de ConTare
                 ConTituloBtc = divInformacionTarea.find_element(By.ID, 'ConTituloBtc').text
                 con_tare_texto = divInformacionTarea.find_element(By.ID, 'ConTare').text
-
-                #Datos de todos los post
-                data_id_tareas = []
-                data_nombreProfesor = []
-                data_FechaTareas = []
-                data_content = []
-                data_subjects = []
-                data_isHomework = []
 
                 try:
 
@@ -310,18 +301,6 @@ def test(request):
                     
                 except:
                     hay_tareas=False
-
-                    
-
-                # data_id_tareas.append(indexTarea)
-                # data_nombreProfesor.append(nombre_profesor)
-                # data_FechaTareas.append(fecha_tarea)
-                # data_content.append(ConTituloBtc+': '+con_tare_texto)
-                # data_subjects.append(findSubjectsByTeacher(nombre_profesor))
-                # data_isHomework.append(str(hay_tareas))
-
-                # AllData_evidence = []
-                # for idtareas in data_id_tareas:
 
                 evidence = [
                     {
@@ -337,120 +316,65 @@ def test(request):
                     
                     }
                 ]
-                # AllData_evidence.append(evidence)
-
-                # print(AllData_evidence)
-                # print('----------------------------')
-                # print(nombre_profesor)
-
-                   
-
-            return JsonResponse({'numeros_tarea':2,'data_evidence': evidence})   
-        
-        else:
-            # AQUI COMIENZA EL MURO
-            global_driver.get(url+'tareas.php?clase='+id_clase)
-            # Esperar a que el elemento esté presente en la página
-            wait = WebDriverWait(global_driver, 10)
-            div_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="divContentListaTareas"]/div[starts-with(@id, "tarea")]')))
-
-            # Lista para almacenar los números de tarea
-            numeros_tarea = []
-
-            # Iterar a través de los elementos div
-            for div_element in div_elements:
-                numero_tarea = div_element.get_attribute("id").replace("tarea[", "").replace("]", "")
-                numeros_tarea.append(numero_tarea)
-
-            return JsonResponse({'numeros_tarea':len(numeros_tarea),'id_tareas': numeros_tarea})   
-
-        
-    
-        # for tareas_num in numeros_tarea:
-        #     print(tareas_num)
-        #     print('-------------------')
-        #     time.sleep(1) 
-        #     global_driver.get(url+'tarea_tt.php?tarea='+str(tareas_num))
-            
-        #     wait = WebDriverWait(global_driver, 10)
-        #     divInformacionTarea = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divInformacionTarea"]')))#//*[@id="FechaTareaInicio"]
-            
-        #     # Obtener el valor de FechaTareaInicio
-        #     fecha_tarea_inicio = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTareaInicio"]').text
-
-        #     # Obtener el valor de FechaTarea
-        #     fecha_tarea = divInformacionTarea.find_element(By.XPATH, '//span[@id="FechaTarea"]').text
-        #     nombre_profesor = divInformacionTarea.find_element(By.XPATH, '//*[@id="divInformacionTarea"]/table/tbody/tr/td[2]/span[5]/strong').text
-
-        #     # Obtener el texto de ConTare
-        #     ConTituloBtc = divInformacionTarea.find_element(By.ID, 'ConTituloBtc').text
-        #     con_tare_texto = divInformacionTarea.find_element(By.ID, 'ConTare').text
-
-        #     try:
-
-        #         if divInformacionTarea.find_element(By.XPATH, '//*[@id="post_load"]').text != "":
-        #             hay_tareas=True
-        #         else:
-        #             hay_tareas=False
                 
-        #     except:
-        #         hay_tareas=False
+            
+            return JsonResponse({'data_evidence': evidence})  
+         
+        else:
 
-        #     data_id_tareas.append(tareas_num)
-        #     data_nombreProfesor.append(nombre_profesor)
-        #     data_FechaTareas.append(fecha_tarea)
-        #     data_content.append(ConTituloBtc+': '+con_tare_texto)
-        #     data_subjects.append(findSubjectsByTeacher(nombre_profesor))
-        #     data_isHomework.append(str(hay_tareas))
+            if request.POST.get('id_career'):#Aqui se traen todos los numeros POST o numeros de evidencias del respectivo curso o carrera
 
-        #     AllData_evidence = []
-        #     for idtareas in data_id_tareas:
-
-        #         evidence = [
-        #             {
-        #                 "id_classroom": id_clase,
-        #                 "classroom": "Técnico en Servicios Comerciales y Financieros",
-        #                 "status": 200,
-        #                 "materia": data_subjects,
-        #                 "id_tarea": idtareas,
-        #                 "didHomework": data_isHomework,
-        #                 "date_end": data_FechaTareas,
-        #                 "names": data_nombreProfesor,
-        #                 "content": data_content
+                listCareer = request.POST.get('id_career')  # Obtener el valor como lista
+                indexCareer = str(listCareer) if listCareer else None  # Obtener el primer elemento de la lista y convertirlo a entero
+                if(isinstance(indexCareer,str)):
                     
-        #             }
-        #         ]
+                    global_driver.get(url+'tareas.php?clase='+indexCareer)
+                    
+                    # Esperar a que el elemento esté presente en la página
+                    wait = WebDriverWait(global_driver, 10)
+                    div_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="divContentListaTareas"]/div[starts-with(@id, "tarea")]')))
 
-        #         sse_data = f"data: {json.dumps(evidence)}\n\n"
-        #         response.write(sse_data)
-        #         response.flush()
+                    # Lista para almacenar los números de tarea
+                    numeros_tarea = []
 
-        # response.write("event: done\ndata: {}\n\n")  # Indicador de que se han enviado todos los datos
-        # return response
+                    # Iterar a través de los elementos div
+                    for div_element in div_elements:
+                        numero_tarea = div_element.get_attribute("id").replace("tarea[", "").replace("]", "")
+                        numeros_tarea.append(numero_tarea)
+
+                # return JsonResponse({'numeros_tarea':len(numeros_tarea),'id_tareas': numeros_tarea})   
+                jsonResponse={'id_career':indexCareer,'id_tareas': numeros_tarea,'status':200}
+                
+
+            elif request.POST.getlist('career'):#Aqui se obtienen todos los cursos o carreras
+
+                global_driver.get(url+'init.php')
+
+                # Encuentra todos los elementos <a> que tienen un atributo href
+                enlaces = global_driver.find_elements(By.CSS_SELECTOR,('a[href*="detalle_curso.php"]'))
+
+                id_career=[]
+                title=[]
+                # for enlace in enlaces:
+                for enlace in enlaces:
+                    # Itera a través de los enlaces y obtén el valor del atributo href
+                    href = enlace.get_attribute("href")
+                    id_value = href.split("=")[-1]
+                    title_valor = enlace.get_attribute("title")
+
+                    # Comprueba si los valores de "id" y "title" no están vacíos
+                    if id_value and title_valor:
+                        # Ahora puedes procesar los valores de "id" y "title", por ejemplo, imprimirlos
+                        id_career.append(id_value)
+                        title.append(title_valor)
+                    
+
+                jsonResponse={'id_career': id_career,'title':title,'status':200}
             
+            else:#Si no hay datos enviados
+                jsonResponse={'status':400}
 
-
-        
-
-
-
-           
-
-            
-
-
-        #1234192477
-        #Colgate123456
-
-        # Imprimir la lista de números de tarea
-        # global_driver.get(url+'tarea_tt.php?tarea='+str(tarea_id))
-        # print(numeros_tarea)
-        
-        # global_driver.get('http://localhost:8000/probar')
-        #https://sena.territorio.la/tareas.php?clase=2776992
-
-
-        # return JsonResponse({'id_classroom':'2776992','status': 200})
+            return JsonResponse(jsonResponse)
 
     else:
             # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
@@ -463,143 +387,8 @@ def test(request):
 
     #https://sena.territorio.la/tareas.php?clase=2776992
 
-@csrf_protect
-def flaka(request):
-    primer_elemento = 'NADA'
-    # print('----------------------')
-    # print(str(request.POST.get('request')))
-    # print('----------------------')
-
-    numeros_tarea=['alexis','julian','maria','paola','pedro']
-
-    if request.POST.getlist('request'):
-        
-        listNumber = request.POST.getlist('request')  # Obtener el valor como lista
-        indexTarea = int(listNumber[0]) if listNumber else None  # Obtener el primer elemento de la lista y convertirlo a entero
-        if(isinstance(indexTarea,int)):
-            primer_elemento = numeros_tarea[indexTarea]
-
-            print('-----------------------------------')
-            print(primer_elemento)
-    else:
-        primer_elemento = 'NADAs'
-
-    
-
-
-    return JsonResponse({'numeros_tarea':len(numeros_tarea),'primer': primer_elemento})
-
-
-#     data = [       {
-#             "id_classroom": "6726881",
-#             "classroom": "Inglés",
-#             "status": 200,
-#             "materia": [
-#                 "Inglés",
-#                 "Inglés",
-#                 "Inglés",
-#             ],
-#             "id_tarea": [
-#                 "400126367",
-#                 "468567762",
-#                 "449956361",
-#             ],
-#             "date_end": [
-#                 "Fecha de entrega: 2023-07-30 23:30:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-08-04 23:30:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-08-12 14:45:00\nArchivos:\nResponder Evidencia",
-#             ],
-#             "names": [
-#                 "EIKA YILIETH PEREZ",
-#                 "EIKA YILIETH PEREZ",
-#                 "EIKA YILIETH PEREZ",
-
-#             ],
-#             "content": [
-#                 "Buenas tardes. Por favor subir la actividad desarrollada en el ambiente de aprendizaje",
-#                 "Subir la tarea de ingles que si no sabes es esta que te voy a mostrar a continuacion",
-#                 "Los dibujos didacticos que te di tienen que ser diferentes y por eso el grupo debe de saber cual es",
-                
-#             ]
-                
-#         },
-
-#         {    
-#             "id_classroom": "2776992",
-#             "classroom": "Técnico en Servicios Comerciales y Financieros",
-#             "status": 200,
-#             "materia": [
-#                 "Asesorar consumidor Financiero",
-#                 "Derechos fundamentales",
-#                 "Derechos fundamentales",
-#                 "Derechos fundamentales",
-#                 "Razonamiento cuantitativo",
-#                 "Derechos fundamentales",
-#                 "Manejar Recursos Financieros",
-#                 "Derechos fundamentales",
-#                 "Derechos fundamentales",
-#                 "Derechos fundamentales",
-#                 "Derechos fundamentales",
-#             ],
-#             "id_tarea": [
-#                 "483078840",
-#                 "479413805",
-#                 "476003090",
-#                 "472620361",
-#                 "470634816",
-#                 "468648314",
-#                 "464688279",
-#                 "459774401",
-#                 "456193106",
-#                 "452513904",
-#                 "497907367",
-#             ],
-#             "date_end": [
-#                 "Fecha de entrega: 2023-08-12 14:45:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-08-04 23:30:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-07-30 23:30:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-07-26 13:00:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-07-21 11:42:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-07-16 23:30:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-07-26 23:30:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-07-07 23:30:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-06-24 23:30:00\nArchivos:\nTRABAJOnYnCIUDADANnnA.mp4\nCARTILLAnEMPLEOnRETORNOnopn3ncompletonbajan11n10n2017.pdf\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-06-19 23:30:00\nArchivos:\nResponder Evidencia",
-#                 "Fecha de entrega: 2023-06-13 23:30:00\nArchivos:\nResponder Evidencia"
-#             ],
-#             "names": [
-#                 "MARIA ELENA MONTUFAR MUÑOZ",
-#                 "JORGE ELIECER VERA TASAMA",
-#                 "JORGE ELIECER VERA TASAMA",
-#                 "JORGE ELIECER VERA TASAMA",
-#                 "YULIETH JARAMILLO OSPINA",
-#                 "JORGE ELIECER VERA TASAMA",
-#                 "EDGAR DE JESUS ARENAS VARGAS",
-#                 "JORGE ELIECER VERA TASAMA",
-#                 "JORGE ELIECER VERA TASAMA",
-#                 "JORGE ELIECER VERA TASAMA",
-#                 "JORGE ELIECER VERA TASAMA"
-#             ],
-#             "content": [
-#                 "Buenas tardes. Por favor subir la actividad desarrollada en el ambiente de aprendizaje",
-#                 "   RAP:     Participar en acciones solidarias   D F T -Espacio para carga de la evidencia 2 Guía 4 Derechos Fundamentales-Los DESC     Apreciado Aprendiz   Se activa el espacio para la carga de evidencia 2 correspondiente a la guía 4 Actividad 2   Evidencia a cargar:  “Derechos económicos sociales y culturales” ",
-#                 " RAP: Participar en acciones solidarias teniendo en cuenta el ejercicio de los derechos humanos, de los pueblos y de la naturaleza.   Apreciad@ Aprendiz   Se activa el espacio para la carga de evidencia1 correspondiente a la guía 4 Actividad 1   Evidencia a cargar:  “Estado social de derecho y la desprotección legal ” ",
-#                 "        RAP: Practicar los derechos fundamentales en el trabajo   Asunto: E D F T y C L -Espacio para carga de la evidencia 2 Guía 3 - Herramientas Jurídicas para reclamar el derecho- Derechos Fundamentales   Apreciado Aprendiz Se activa el espacio para la carga de evidencias correspondiente a la guía 3 Actividad 2   Evidencia por cargar: “Herramientas Jurídicas para reclamar el derecho ”   ",
-#                 " Aquí enviaras los talleres de: -Figuras geométricas áreas, perímetros y volúmenes - Teorema de Pitágoras - Funciones Trigonométricas, en total son 3 archivos para enviar como evidencia de tu trabajo en clase. ",
-#                 "   RAP: Practicar los derechos fundamentales en el trabajo de acuerdo con la Constitución Política y los Convenios Internacionales.   Apreciado Aprendiz Se activa el espacio para la carga de evidencias correspondiente a la guía 3 Actividad 1   Evidencia por cargar: “artículos constitucionales relacionados con los derechos del trabajador” ",
-#                 " Elaborar un guion escrito para realizar una simulación donde se identifiquen las características, los tipos de servicios, las tarifas y condiciones del proceso vistos durante la guía. La simulación se realizará en clase para presentar a sus compañeros e instructor. ",
-#                 " RAP: Valorar la importancia de la ciudadanía laboral Apreciado Aprendiz Se activa el espacio para la carga de evidencia 2- Derecho colectivo del trabajo- correspondiente a la guía 2 Actividad 2.   Producto evidencia a cargar: “Derecho laboral colectivo” ",
-#                 " RAP: Valorar la importancia de la ciudadanía laboral Apreciado Aprendiz Se activa el espacio para la carga de evidencia 1 correspondiente a la guía 2 Actividad 1. Producto evidencia a cargar: Derecho laboral individual y Ciudadanía Laboral. Recordar que el producto debe socializarse. ",
-#                 " RAP: Reconocer el trabajo como factor de movilidad social Apreciado Aprendiz Se activa el espacio para la carga de evidencias 2-Actividad 2 correspondiente a la guía 1. Evidencia por cargar: “La Dignidad Humana y Cambios en el Mundo del Trabajo” ",
-#                 " RAP1: Reconocer el trabajo como factor de movilidad social y transformación vital, con referencia a la fenomenología y a los derechos fundamentales en el trabajo. Apreciado Aprendiz Se activa el espacio para la carga de evidencia 1 correspondiente a la guía 1. Evidencia a cargar: “Evolución del trabajo y su fenomenología” “FUNDAMENTOS DE ECONOMIA”  "
-#             ]
-                
-#         }
-# ]
-
-
-#     # return render(request, 'test.html')
-#     return JsonResponse({'data': data})
+    #1234192477
+    #Colgate123456
 
 
 def getContent(request):
@@ -677,7 +466,6 @@ def getContent(request):
             # global_driver.get(url+'init.php?muro=1')
 
             return JsonResponse({'status': 400, 'message': 'ERROR'})
-
 
 #https://sena.territorio.la/perfil.php?id=31247202
 #https://sena.territorio.la/tareas.php?clase=2776992
