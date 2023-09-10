@@ -151,23 +151,19 @@ def find_post(request):
         if request.POST.get('tarea_id'):
 
             tarea_id=request.POST.get('tarea_id')
-            print('tarea_id',tarea_id)
+            print('Esta es el id: ',tarea_id)
 
             # AQUI COMIENZA EL PERFIL
             
             # Se da clic en evidencias
-            # http://sena.territorio.la/tarea_tt.php?tarea=479413805
-
-            
-            global_driver.get(url+'tarea_tt.php?tarea='+str(tarea_id))
     
             if request.POST.get('vinculo') or request.FILES.getlist('files[]'):#Estos REQUEST son obtenidos de mi pagina interfaz
-
+                print('DENTRO PARA OBTENER EL GET')
                 if request.FILES.getlist('files[]'):
                     archivos = request.FILES.getlist('files[]')
 
                     wait = WebDriverWait(global_driver, 10)
-
+                    global_driver.get(url+'tarea_tt.php?tarea='+str(tarea_id))
                     # Encuentra el elemento de entrada de archivo (input type="file") por su atributo "name" o "id"
    
                     archivo_ruta = []  # Inicializa la lista para las rutas de los archivos
@@ -197,6 +193,8 @@ def find_post(request):
                     contentSena.click()
                     input_vinculo = global_driver.find_element(By.ID, "linktare")
                     input_vinculo.send_keys(text_vinculo)    
+                    adjuntarButton= global_driver.find_element(By.XPATH, '//*[@id="botonL"]')
+                    adjuntarButton.click()
                 
                 # Cuando esté todo ok, se procede a activar el boton de abajo!
                 # boton_enviar = global_driver.find_element(By.XPATH, "//*[@id='contestarTareaBoton']")
@@ -213,8 +211,8 @@ def find_post(request):
 
     else:
         # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
-        # global_driver = initialize_driver()
-        # global_driver.get(url + 'index.php?login=true')
+        global_driver = initialize_driver()
+        global_driver.get(url + 'index.php?login=true')
 
         return JsonResponse({'status': 400, 'message': 'ERROR DEL BUENO'})
   
@@ -275,7 +273,7 @@ def test(request):
             indexTarea = int(listNumber[0]) if listNumber else None  # Obtener el primer elemento de la lista y convertirlo a entero
             if(isinstance(indexTarea,int)):
                 time.sleep(1) 
-
+              
                 global_driver.get(url+'tarea_tt.php?tarea='+str(indexTarea))
             
                 wait = WebDriverWait(global_driver, 10)
@@ -327,13 +325,14 @@ def test(request):
                 listCareer = request.POST.get('id_career')  # Obtener el valor como lista
                 indexCareer = str(listCareer) if listCareer else None  # Obtener el primer elemento de la lista y convertirlo a entero
                 if(isinstance(indexCareer,str)):
-                    
-                    global_driver.get(url+'tareas.php?clase='+indexCareer)
-                    
-                    # Esperar a que el elemento esté presente en la página
-                    wait = WebDriverWait(global_driver, 10)
-                    div_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="divContentListaTareas"]/div[starts-with(@id, "tarea")]')))
+                    time.sleep(1) 
 
+                    # Esperar a que el elemento esté presente en la página
+                    print('Este es el index de la carrera: ',indexCareer)
+                    wait = WebDriverWait(global_driver, 10)
+                    global_driver.get(url+'tareas.php?clase='+indexCareer)
+                    div_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//*[@id="divContentListaTareas"]/div[starts-with(@id, "tarea")]')))
+                    # print(div_elements)
                     # Lista para almacenar los números de tarea
                     numeros_tarea = []
 
@@ -389,7 +388,6 @@ def test(request):
 
     #1234192477
     #Colgate123456
-
 
 def getContent(request):
 
@@ -466,6 +464,26 @@ def getContent(request):
             # global_driver.get(url+'init.php?muro=1')
 
             return JsonResponse({'status': 400, 'message': 'ERROR'})
+
+@csrf_protect
+def probando(request):
+
+    global global_driver
+    
+    if global_driver and is_driver_active(global_driver):
+        time.sleep(1) 
+        wait = WebDriverWait(global_driver, 10)
+        global_driver.get('http://sena.territorio.la/tarea_tt.php?tarea=480291910')
+        # divInformacionTarea = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divInformacionTarea"]')))#//*[@id="FechaTareaInicio"]
+        print('divInformacionTarea')
+        return JsonResponse({'status':200})
+
+    else:
+            # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
+            global_driver = initialize_driver()
+            global_driver.get(url + 'index.php?login=true')
+
+            return JsonResponse({'status': 400, 'message': 'ERROR DEL BUENO'})
 
 #https://sena.territorio.la/perfil.php?id=31247202
 #https://sena.territorio.la/tareas.php?clase=2776992

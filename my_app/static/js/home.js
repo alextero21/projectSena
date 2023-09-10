@@ -1,14 +1,44 @@
-
-
-//RELAJATE!!!
-// var id_carrer; // Variable global para almacenar el valor de id_carrer
-
-
 $(document).ready(function () {
 
   var url = '/probar';
-  var pausar = false; // Inicialmente, el proceso está activo
-  var evidenceIndex = 0; // Índice para recorrer las evidencias
+  let pausar = false; // Inicialmente, el proceso está activo
+  let evidenceIndex; // Índice para recorrer las evidencias
+  let id_carrer;
+
+  let intoSendFile=false; 
+  var csrfToken = $('[name=csrfmiddlewaretoken]').val();
+  let tareaIds
+  let careers;
+  let eventClic=false;
+  var obkect={
+    "id_career": "2776992",
+    "id_tareas": [
+        "487906363",
+        "483078840",
+        "480296055",
+        "480295550",
+        "480294715",
+        "480293470",
+        "480292600",
+        "480291910",
+        "480291090",
+        "479413805",
+        "478255920",
+        "476003090",
+        "474544426",
+        "472620361",
+        "471510651",
+        "470634816",
+        "469578921",
+        "468648314",
+        "467677029",
+        "464688279",
+        "459774401",
+        "456193106",
+        "452513904"
+    ],
+    "status": 200
+}
 
   function showEvidence(data,i){
     
@@ -23,6 +53,7 @@ $(document).ready(function () {
     var classroom = d.classroom;
     var didHomework = d.didHomework;
     var date_end = d.date_end;
+    
 
     content+=`
       <li class="list-group-item">`+i+`. `+nombre_profesor+`: <a data-bs-toggle="modal" data-bs-target="#exampleModal" href="" data-tarea-id="`+id_tarea+`" data-info='{"profesor": "`+nombre_profesor+`", "materia": "`+materia+`"}'>`+contenido+`</a></li>
@@ -30,16 +61,84 @@ $(document).ready(function () {
     return content
 
   }
-  
-  async function requestEachEvidence() {
-    console.log(pausar);
-    if (pausar) return; // Si está pausado, no continúes
-    console.log('Dentro del EVIDENCE BUCLE');
 
-    var csrfToken = $('[name=csrfmiddlewaretoken]').val();
-    
+  async function sendFiles() {//Envía las respuesta de imagenes, o vinculo para luego ser enviada al profesor
+
+    var fileList = $("#file")[0].files;
+    var selectedFiles = [];
+    for (var i = 0; i < fileList.length; i++) {
+      selectedFiles.push(fileList[i]);
+    }
+  
+    var url_vinculo=$("#vinculo").val()
+
+    var formData = new FormData();
+  
+    if (selectedFiles.length > 0) {
+      for (var i = 0; i < selectedFiles.length; i++) {
+        formData.append("files[]", selectedFiles[i]);
+      }
+    }else if(selectedFiles.length == 0){
+      formData.append("files[]", selectedFiles[0]);
+    }
+  
+    formData.append("vinculo",url_vinculo)
+    formData.append("tarea_id",tareaIds)
+    console.log(tareaIds);
+    console.log(careers);
+
     try {
-      const data = await $.ajax({
+  
+      const findPost=await $.ajax({
+        url: "/findPost",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        beforeSend: function (xhr) {
+          // Agregar el token CSRF a la cabecera de la solicitud
+          xhr.setRequestHeader('X-CSRFToken', csrfToken);
+        }
+      });
+
+      if(findPost){
+        //Cuando se termine el proceso de poner los datos en evidencias, se reanuda el proceso de ir buscando post por post
+        
+          pausar=false
+          intoSendFile=true
+          console.log(careers);
+          console.log(evidenceIndex);
+          Get3(careers,evidenceIndex+1)
+          
+
+          // const ideas= await $.ajax({
+          //   url: "/probando",
+          //   type: "POST",
+          //   data: formData,
+          //   contentType: false,
+          //   processData: false,
+          //   beforeSend: function (xhr) {
+          //     // Agregar el token CSRF a la cabecera de la solicitud
+          //     xhr.setRequestHeader('X-CSRFToken', csrfToken);
+            
+          // }})
+          // console.log(ideas);
+      }
+  
+    } catch (error) {
+      console.log("Error:"+ error);
+    }
+  
+    
+  
+  
+  }
+  
+  async function Get1() {//Obtiene todos los programas o carreras de la cuenta SENA
+
+    try {
+
+      const getCareer = await $.ajax({
         url: url,
         type: 'POST',
         data: {career:1},
@@ -47,14 +146,14 @@ $(document).ready(function () {
         beforeSend: function(xhr) {
           xhr.setRequestHeader('X-CSRFToken', csrfToken);
         }
+        
       });
   
+      if (getCareer.id_career && getCareer.title){
 
-      if (data.id_career && data.title){
+        id_carrer=getCareer.id_career
+        title=getCareer.title
 
-
-        id_carrer=data.id_career
-        title=data.title
 
         if(id_carrer.length == title.length){
           
@@ -86,59 +185,9 @@ $(document).ready(function () {
           }
 
           card.html(template_card)
-          
 
-          try {//Aqui se obtienen todos los numeros POST del curso o carrera
-            const data = await $.ajax({
-              url: url,
-              type: 'POST',
-              data: {id_career: id_carrer[0]},
-              dataType: 'json',
-              beforeSend: function(xhr) {
-                xhr.setRequestHeader('X-CSRFToken', csrfToken);
-              }
-            });
-      
-        
-            if (data.id_tareas) {
-      
-              for (let i = 0; i < data.id_tareas.length; i++) {
-      
-                var id_tarea = data.id_tareas[i];
-      
-                  const evidence = await $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {id_tareas: id_tarea},
-                    dataType: 'json',
-                    beforeSend: function(xhr) {
-                      xhr.setRequestHeader('X-CSRFToken', csrfToken);
-                    }
-                  });
-                  // Encuentra el elemento <ul> con el atributo data-career-id coincidente
-                  var ulCarrer = $('ul[data-career-id="' + evidence.data_evidence[0].id_classroom + '"]');
-      
-                  if (ulCarrer.length > 0) {
-                    // Crea un nuevo elemento <li> para la materia y agrega el texto
-                    var evidenceAppend=showEvidence(evidence.data_evidence[0],i+1)
-      
-                    // Agrega el <li> al <ul>
-                    ulCarrer.append(evidenceAppend);
+          Get2(id_carrer)
           
-                  }
-                
-      
-      
-              }
-           
-              
-            } else {
-              console.log('No hay evidencias, error 3');
-            }
-          } catch (error) {
-            console.log("Error en la solicitud AJAX 3:", error);
-          }
-
         }
 
         
@@ -146,14 +195,91 @@ $(document).ready(function () {
 
       
     } catch (error) {
-      console.log("Hay un error al enviar datos");
+      console.log("Hay un error al enviar datos"+error);
     }
 
-    // Incrementa evidenceIndex para obtener la siguiente evidencia en la próxima llamada
-    evidenceIndex++;
+  }
 
-    // Llama recursivamente a procesarEvidencias después de un retraso (puedes ajustar el tiempo)
-    // setTimeout(requestEachEvidence, 20000); // 1000 milisegundos (1 segundo)
+  async function Get2(id_carrer){//Obtiene todos los numeros POST del curso o carrera, buscando cada evidencia para luego ser agregados en un tag ul
+
+    //Aqui inicia la ultima solicitud, que es para rellenar dato por dato de evidencias
+    try {
+        
+        // Aqui se obtienen todos los numeros POST del curso o carrera
+        const career_numbers = await $.ajax({
+          url: url,
+          type: 'POST',
+          data: {id_career: id_carrer[0]},
+          dataType: 'json',
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+          }
+        });
+        careers=career_numbers
+        Get3(career_numbers,0)
+
+    } catch (error) {
+      console.log("Error en la solicitud AJAX 3:"+ error.message);
+    }
+ 
+  }
+
+  async function Get3(career_numbers,index){
+
+    if (career_numbers.id_tareas) {
+      totalEvidenceIndex=career_numbers.id_tareas.length
+      
+          try {
+
+            for (let i = index; i < career_numbers.id_tareas.length; i++) {
+
+              evidenceIndex=i
+      
+              var id_tarea = career_numbers.id_tareas[i];
+
+              const evidence = await $.ajax({//Se agrega evidencia por evidencia en un tag ul
+                url: url,
+                type: 'POST',
+                data: {id_tareas: id_tarea},
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                  xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                }
+              });
+              // console.log(evidence);
+              
+              if(evidence){
+                // Encuentra el elemento <ul> con el atributo data-career-id coincidente
+                var ulCarrer = $('ul[data-career-id="' + evidence.data_evidence[0].id_classroom + '"]');
+                if (ulCarrer.length > 0) {
+                  // Crea un nuevo elemento <li> para la materia y agrega el texto
+                  var evidenceAppend=showEvidence(evidence.data_evidence[0],i+1)
+    
+                  // Agrega el <li> al <ul>
+                  ulCarrer.append(evidenceAppend);
+        
+                }
+              }
+
+              if (pausar) {
+                break;
+              }
+
+            }
+
+            if (pausar) {
+              sendFiles()
+              // eventClic=true;
+            }       
+            
+          } catch (error) {
+            console.log(error);
+          }
+
+    } else {
+      console.log('No hay evidencias, error 3');
+    }
+
   }
 
   //Utiliza la delegación de eventos para manejar los clics en ".list-group-item a"
@@ -165,127 +291,31 @@ $(document).on("click", ".list-group-item a", function (e) {
   
   $("#teacher_title").html('<span class="title_card">Profesor: </span>' + dataInfo.profesor);
   $("#work_title").html('<span class="title_card">Materia: </span>' + dataInfo.materia);
-  
-  $("#sendImage").data('tarea-id', tarea_id);
+
+  // $("#sendImage").data('tarea-id', tarea_id);
+  $("#sendImage").attr('data-tarea-id', tarea_id);;
 
 });
 
  // Manejador de clic en el botón "sendImage"
  $(document).on("click", "#sendImage", async  function (e) {
   e.preventDefault();
-  pausar = true;
-
-  var fileList = $("#file")[0].files;
-  var selectedFiles = [];
-
-  for (var i = 0; i < fileList.length; i++) {
-    selectedFiles.push(fileList[i]);
-  }
-
-  var url_vinculo=$("#vinculo").val()
-  var id_tarea=$(this).data('tarea-id')
-
-  var formData = new FormData();
-
-  if (selectedFiles.length > 0) {
-    for (var i = 0; i < selectedFiles.length; i++) {
-      formData.append("files[]", selectedFiles[i]);
-    }
-  }else if(selectedFiles.length == 0){
-    formData.append("files[]", selectedFiles[0]);
-  }
-
-  formData.append("vinculo",url_vinculo)
-  formData.append("tarea_id",id_tarea)
-
-  var csrfToken = $('[name=csrfmiddlewaretoken]').val();
-  try {
-
-    const responseServer = await $.ajax({
-      url: "/findPost",
-      type: "POST",
-      data: formData,
-      contentType: false,
-      processData: false,
-      beforeSend: function (xhr) {
-        // Agregar el token CSRF a la cabecera de la solicitud
-        xhr.setRequestHeader('X-CSRFToken', csrfToken);
-      },
-      success: function (data) {
-      // Aquí puedes manejar la respuesta exitosa del servidor
-      
-        console.log(data);
-        
-        // requestEachEvidence();
-
-        
-
-  
-      // Puedes realizar acciones adicionales aquí según la respuesta del servidor
-    },
-    error: function (error) {
-      // Aquí puedes manejar errores en la solicitud AJAX
-      console.log("Error:"+ error);
-    },
-    complete: function () {
-      // Esta función se ejecutará después de que se complete la solicitud,
-      // ya sea exitosa o con error. Puedes realizar acciones generales aquí.
-      console.log("COMPLETE:");
-      console.log("LISTO PARA EL EVIDENCE:");
-      pausar = false;
-      // requestEachEvidence()
-    }
-  
-  });
-          
-
-  } catch (error) {
-    console.log("Error:"+ error);
-  }
+   //Cambia de estado la variable pausar, para el bucle de Get2()
+    // pausar = !pausar;
+    pausar = true
+    // console.log($(this).data('tarea-id'));
+    tareaIds=$(this).data('tarea-id')
 
 
 });
 
 // Inicia el proceso cuando se carga la página, si no está pausado inicialmente
-  requestEachEvidence();
+  Get1();
+
+
 
 
 });
-
-// const array=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P','Q','R','S','T','V','W','X','Y','Z']
-
-
-// let index = 0;
-// let pausar = false; // Inicialmente, el bucle está iniciado
-
-// function letrasAMostrar(array) {
-//   if (index < array.length) {
-//     const letra = array[index];
-//     console.log('Letra: ' + letra);
-//     index++;
-//   } else {
-//     console.log('Fin del array');
-//     pausar = true; // Cuando llegamos al final, pausamos el bucle
-//   }
-  
-//   if (!pausar) {
-//     setTimeout(function() {
-//       letrasAMostrar(array); // Llama a la función recursivamente después de un retraso
-//     }, 1000);
-//   }
-// }
-
-// $(document).on("click", "#enviar", async function (e) {
-//   pausar = !pausar; // Cambia el estado de pausa al hacer clic en el botón
-//   if (!pausar) {
-//     letrasAMostrar(array); // Inicia o reanuda el bucle si no está pausado
-//   }
-// });
-
-// // Inicia el bucle si no está pausado inicialmente
-// if (!pausar) {
-//   letrasAMostrar(array);
-// }
 
 
 
