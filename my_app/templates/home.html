@@ -55,7 +55,7 @@
   
         {% for e in content %}
   
-          <div class="card decoration_card" style="width: 18rem;">
+          <!-- <div class="card decoration_card" style="width: 18rem;">
             <img src="../static/images/agente.png" class="card-img-top" alt="...">
             <div class="card-body">
               <h5 class="card-title ">{{e.texto}}</h5>
@@ -70,7 +70,8 @@
               <a href="#" class="card-link btn btn-light">Todas las tareas</a>
               <a href="{{'getUrl'}}{{e.href}}" class="card-link btn btn-warning">Ver curso</a>
             </div>
-          </div>
+          </div> -->
+          
   
         {% endfor %}
   
@@ -106,6 +107,7 @@
 
           <div class="input-group">
             <textarea class="form-control" aria-label="With textarea" placeholder="Algun dato o informacion para el profe (Opcional)"></textarea>
+            <input type="hidden" id="tarea_id" value>
             <button type="button" class="btn btn-outline-primary" id="sendImage">Enviar</button>
             <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
               <span class="visually-hidden">Toggle Dropdown</span>
@@ -127,15 +129,6 @@
   </div>
 </div>
 <!-- End Modal -->
-
-<div id="prueba"></div>
-
-  </div>
-
-<button id="enviar">PROBAR</button>
-<!-- <p id='continueData' data-id=false></p> -->
-<input type="hidden" id="continueData" value='false'>
-<div id="resultados"></div>
 
 
 

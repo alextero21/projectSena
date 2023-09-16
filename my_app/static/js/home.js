@@ -1,13 +1,19 @@
 $(document).ready(function () {
 
+
+
+
+  // Oculta elementos <li> después del número máximo de elementos visibles
+  
+
   var url = '/probar';
   let pausar = false; // Inicialmente, el proceso está activo
   let evidenceIndex; // Índice para recorrer las evidencias
   let id_carrer;
-
+  let maxVisibleItems = 5; // Cambia este valor al número deseado de elementos visibles
   let intoSendFile=false; 
   var csrfToken = $('[name=csrfmiddlewaretoken]').val();
-  let tareaIds
+
   let careers;
   let eventClic=false;
   var obkect={
@@ -38,7 +44,9 @@ $(document).ready(function () {
         "452513904"
     ],
     "status": 200
-}
+  }
+
+  
 
   function showEvidence(data,i){
     
@@ -72,6 +80,8 @@ $(document).ready(function () {
   
     var url_vinculo=$("#vinculo").val()
 
+
+    tareaIds=$("#tarea_id").val()
     var formData = new FormData();
   
     if (selectedFiles.length > 0) {
@@ -84,7 +94,7 @@ $(document).ready(function () {
   
     formData.append("vinculo",url_vinculo)
     formData.append("tarea_id",tareaIds)
-    console.log(tareaIds);
+    
     console.log(careers);
 
     try {
@@ -103,12 +113,11 @@ $(document).ready(function () {
 
       if(findPost){
         //Cuando se termine el proceso de poner los datos en evidencias, se reanuda el proceso de ir buscando post por post
-        
+
           pausar=false
-          intoSendFile=true
-          console.log(careers);
-          console.log(evidenceIndex);
           Get3(careers,evidenceIndex+1)
+
+          
           
 
           // const ideas= await $.ajax({
@@ -124,6 +133,8 @@ $(document).ready(function () {
           // }})
           // console.log(ideas);
       }
+
+      
   
     } catch (error) {
       console.log("Error:"+ error);
@@ -174,7 +185,7 @@ $(document).ready(function () {
                 <ul class="list-group list-group-flush " data-career-id="`+id_carrer_for+`"></ul>
                 
                 <div class="card-body decoration_card">
-                  <a href="#" class="card-link btn btn-light">Todas las tareas</a>
+                  <button class="showHomeworks card-link btn btn-light" style="display:none;">Ver + tareas</button>
                   <a href="#" class="card-link btn btn-warning">Ver curso</a>
                 </div>
               </div>
@@ -185,6 +196,18 @@ $(document).ready(function () {
           }
 
           card.html(template_card)
+
+          // Manejador de clic en el botón "Mostrar más"
+          $(".showHomeworks").eq(0).on("click", async function() {
+            // Muestra los siguientes elementos ocultos
+            console.log('Seleccionado el primero y no el segundo');
+            var ul = $(".list-group");
+            cantItemsShow=3
+            ul.find("li:hidden:lt("+cantItemsShow+")").show();
+            evidenceIndex=1
+            maxVisibleItems=cantItemsShow+maxVisibleItems //3+5=8  8+3=11
+            console.log(maxVisibleItems);
+          });
 
           Get2(id_carrer)
           
@@ -259,13 +282,22 @@ $(document).ready(function () {
                   ulCarrer.append(evidenceAppend);
         
                 }
+            
+                var ul = $(".list-group"); // Selecciona tu lista <ul>
+                ul.find("li:gt(" + (maxVisibleItems - 1) + ")").hide()
+                if(evidenceIndex >= maxVisibleItems){
+                  restante=(evidenceIndex+1)-maxVisibleItems
+                  console.log(restante); //5-2=3
+                  $(".showHomeworks").show();
+                  
+                }
               }
 
               if (pausar) {
                 break;
               }
 
-            }
+            }            
 
             if (pausar) {
               sendFiles()
@@ -291,23 +323,20 @@ $(document).on("click", ".list-group-item a", function (e) {
   
   $("#teacher_title").html('<span class="title_card">Profesor: </span>' + dataInfo.profesor);
   $("#work_title").html('<span class="title_card">Materia: </span>' + dataInfo.materia);
-
-  // $("#sendImage").data('tarea-id', tarea_id);
-  $("#sendImage").attr('data-tarea-id', tarea_id);;
+  $("#tarea_id").val(tarea_id);
 
 });
 
  // Manejador de clic en el botón "sendImage"
  $(document).on("click", "#sendImage", async  function (e) {
-  e.preventDefault();
-   //Cambia de estado la variable pausar, para el bucle de Get2()
-    // pausar = !pausar;
-    pausar = true
-    // console.log($(this).data('tarea-id'));
-    tareaIds=$(this).data('tarea-id')
+    e.preventDefault();
 
+    //Cambia de estado la variable pausar, para el bucle de Get2()
+    pausar = true
 
 });
+
+
 
 // Inicia el proceso cuando se carga la página, si no está pausado inicialmente
   Get1();
@@ -315,7 +344,10 @@ $(document).on("click", ".list-group-item a", function (e) {
 
 
 
+
 });
+
+
 
 
 
