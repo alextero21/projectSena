@@ -42,7 +42,7 @@
 					</span>
 
 					<div class="wrap-input100 validate-input">
-						<input class="input100" id="identification" type="number" name="identification" placeholder="Number">
+						<input class="input100" id="identification" type="text" name="identification" placeholder="Number">
 						<span class="focus-input100"></span>
 						<span class="symbol-input100">
 							<i class="fa fa-envelope" aria-hidden="true"></i>
@@ -118,14 +118,6 @@
 
         // Datos a enviar en la solicitud POST
 				var csrfToken = $('[name=csrfmiddlewaretoken]').val();
-
-				// Datos que deseas enviar en la solicitud POST
-				var postData = {
-						user: 1234192477,
-						pass: 'Colgate123456',
-						// No es necesario agregar el token CSRF al objeto de datos
-						// Lo agregaremos en la cabecera de la solicitud AJAX
-				};
 				
         // Enviar la solicitud AJAX con el token CSRF en la cabecera
 				
@@ -168,14 +160,14 @@
 							}
 						});
 
-					});
+				});
 
 
 				//ESTE ES POR DEFECTO, PARA ABRIR AL INICIO EL NAVEGADOR
-        $.ajax({
+        		$.ajax({
 					url: sitioWeb2URL,
 					type: 'POST',
-					data: postData,
+					data: {d:1},
 					dataType: 'json', // Opcional, dependiendo del tipo de respuesta esperado
 					beforeSend: function(xhr) {
 							// Agregar el token CSRF a la cabecera de la solicitud
@@ -190,7 +182,7 @@
 							// Función que se ejecuta si la solicitud falla
 							console.log(errorThrown)
 					}
-			  });
+			 	});
 
 
     }

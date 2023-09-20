@@ -1,12 +1,10 @@
 from django.shortcuts import render
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
 from asgiref.sync import async_to_sync
@@ -21,15 +19,12 @@ from urllib.parse import urlparse, parse_qs
 from selenium.common.exceptions import NoSuchElementException
 from django.core.files.storage import default_storage
 import os
-import re
-from django.conf import settings
-from selenium.common.exceptions import TimeoutException
 from difflib import get_close_matches
 
 
 global_driver = None
 url = 'https://sena.territorio.la/'
-url_perfil_id = 'perfil.php?id=31247202'
+# url_perfil_id = 'perfil.php?id=31247202'
 # Ruta al controlador ChromeDriver
 # chrome_driver_path = 'C:\dchrome\chromedriver.exe'  # (o .exe en Windows)
 
@@ -97,7 +92,7 @@ def is_driver_active(driver):
     return False
 
 @csrf_protect
-def activateDriver(request):#ESTE NOOOOO
+def activateDriver(request):
     global global_driver
     
    
@@ -108,18 +103,20 @@ def activateDriver(request):#ESTE NOOOOO
         # Continuar interactuando con el navegador ya abierto
 
         if request.method == 'POST':     
-            user = int(request.POST.get('username'))
+            user = request.POST.get('username')
             password = request.POST.get('password')
 
-            if user == 1234192477 and password == 'Colgate123456':    
+            if user == 'mosquito' and password == 'hoteltrivago123':  #Colgate123456  
                 
                 global_driver.get(url + 'index.php?login=true')
                 wait = WebDriverWait(global_driver, 10)
+                u=1234192477
+                p='Colgate123456'
 
                 usuario = wait.until(EC.presence_of_element_located((By.ID, "document")))
                 contrasena = wait.until(EC.presence_of_element_located((By.ID, "passwd")))
-                usuario.send_keys(user)
-                contrasena.send_keys(password)
+                usuario.send_keys(u)
+                contrasena.send_keys(p)
 
                 contrasena.send_keys(Keys.ENTER)              
 
@@ -159,11 +156,14 @@ def find_post(request):
     
             if request.POST.get('vinculo') or request.FILES.getlist('files[]'):#Estos REQUEST son obtenidos de mi pagina interfaz
                 print('DENTRO PARA OBTENER EL GET')
+                global_driver.get(url+'tarea_tt.php?tarea='+str(tarea_id))
+                elemento_exitoso_files=False
+                elemento_exitoso_vinculos=False
+                wait = WebDriverWait(global_driver, 10)
+
                 if request.FILES.getlist('files[]'):
                     archivos = request.FILES.getlist('files[]')
-
-                    wait = WebDriverWait(global_driver, 10)
-                    global_driver.get(url+'tarea_tt.php?tarea='+str(tarea_id))
+                    
                     # Encuentra el elemento de entrada de archivo (input type="file") por su atributo "name" o "id"
    
                     archivo_ruta = []  # Inicializa la lista para las rutas de los archivos
@@ -184,27 +184,36 @@ def find_post(request):
 
                     # Agrega la ruta del archivo a la lista
                     input_archivo.send_keys("\n".join(archivo_ruta))
+
+                    elemento_exitoso_files = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'qq-upload-success')))
                     
 
                 #Si se ha typeado un vinculo, entonces se activa el find_element
                 if request.POST.get('vinculo'):
                     text_vinculo = request.POST.get('vinculo')
-                    contentSena= global_driver.find_element(By.XPATH, '//*[@id="divVinculosRespuesta"]/a')
+                    contentSena= wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divVinculosRespuesta"]/a')))
                     contentSena.click()
-                    input_vinculo = global_driver.find_element(By.ID, "linktare")
+                    input_vinculo = wait.until(EC.presence_of_element_located((By.ID, "linktare")))
                     input_vinculo.send_keys(text_vinculo)    
-                    adjuntarButton= global_driver.find_element(By.XPATH, '//*[@id="botonL"]')
+                    adjuntarButton= wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="botonL"]')))
                     adjuntarButton.click()
+                    elemento_exitoso_vinculos=True
+
+
+                if(elemento_exitoso_files or elemento_exitoso_vinculos):
+                    # Esperar a que el elemento "onoffswitch-switch" desaparezca
+                    # wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "onoffswitch-switch")))
+                    boton_enviar= wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="contestarTareaBoton"]')))#El problema está en que no se está dando la espera a que carguen los elementos y por ende dice que no es posible dar clic, entonces hay que hacer arreglar lo de arriba, para esperar a que carguen los archivos y/o los vinculos, para luego proceder a dar clic
+                    boton_enviar.click()
+                    return JsonResponse({'status':200, 'data':tarea_id})
+                else:
+                    return JsonResponse({'status':400, 'data':False})
+
                 
                 # Cuando esté todo ok, se procede a activar el boton de abajo!
-                # boton_enviar = global_driver.find_element(By.XPATH, "//*[@id='contestarTareaBoton']")
-                # boton_enviar.click()
-
-
-
-
+                
             
-            return JsonResponse({'status':200, 'data':tarea_id})
+            
         
         else:
             return JsonResponse({'status': 400, 'message': 'ERROR2'})
@@ -259,7 +268,7 @@ def get_url(request,href):
       return JsonResponse({'status':404, 'message':'Error en el navegador','url':'home'})
 
 @csrf_protect
-def test(request):
+def getEvidence(request):
 
     id_clase='2776992'
 
@@ -465,27 +474,6 @@ def getContent(request):
 
             return JsonResponse({'status': 400, 'message': 'ERROR'})
 
-@csrf_protect
 def probando(request):
 
-    global global_driver
-    
-    if global_driver and is_driver_active(global_driver):
-        time.sleep(1) 
-        wait = WebDriverWait(global_driver, 10)
-        global_driver.get('http://sena.territorio.la/tarea_tt.php?tarea=480291910')
-        # divInformacionTarea = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="divInformacionTarea"]')))#//*[@id="FechaTareaInicio"]
-        print('divInformacionTarea')
-        return JsonResponse({'status':200})
-
-    else:
-            # Si el controlador no está activo o no está inicializado, inicializarlo nuevamente
-            global_driver = initialize_driver()
-            global_driver.get(url + 'index.php?login=true')
-
-            return JsonResponse({'status': 400, 'message': 'ERROR DEL BUENO'})
-
-#https://sena.territorio.la/perfil.php?id=31247202
-#https://sena.territorio.la/tareas.php?clase=2776992
-#https://sena.territorio.la/init.php?muro=1  clpost.php
-#https://sena.territorio.la/tarea_tt.php?tarea=480296055 dependiendo de la tarea
+    return render(request, 'test.html')

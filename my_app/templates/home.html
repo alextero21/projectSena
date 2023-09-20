@@ -51,31 +51,33 @@
 
 
     <div id="card">
-      {% if content %}
+      <!-- {% if content %}
   
         {% for e in content %}
   
-          <!-- <div class="card decoration_card" style="width: 18rem;">
-            <img src="../static/images/agente.png" class="card-img-top" alt="...">
-            <div class="card-body">
-              <h5 class="card-title ">{{e.texto}}</h5>
-              <p class="card-text">Recorderis: sadsadasd</p>
-            </div>
-            <ul class="list-group list-group-flush ">
-              <li class="list-group-item">Tarea 1: <a data-bs-toggle="modal" data-bs-target="#exampleModal" href="" data-tarea-id="480296055" data-info="{&quot;profesor&quot;: &quot;ALEX FERNANDO LOPEZ&quot;, &quot;materia&quot;: &quot;AMBIENTAL Y SST&quot;}">Actividad 9. Verificación y reporte condiciones inseguras, reporte de actos inseguros e incidentes: Actividad 9. Verificación y reporte condiciones inseguras, reporte de actos inseguros e incidentes</a></li>
-              <li class="list-group-item">Tarea 2: <a data-bs-toggle="modal" data-bs-target="#exampleModal" href="" data-tarea-id="480295550" data-info="{&quot;profesor&quot;: &quot;ALEX FERNANDO LOPEZ&quot;, &quot;materia&quot;: &quot;AMBIENTAL Y SST&quot;}">Actividad 8. Taller peligros y riesgos: Actividad 8. Taller peligros y riesgos</a></li>
-              <li class="list-group-item">Tarea 3: <a data-bs-toggle="modal" data-bs-target="#exampleModal" href="" data-tarea-id="480294715" data-info="{&quot;profesor&quot;: &quot;ALEX FERNANDO LOPEZ&quot;, &quot;materia&quot;: &quot;AMBIENTAL Y SST&quot;}">Actividad 7. Taller conceptos epidemiológicos: Actividad 7. Taller conceptos epidemiológicos</a></li>
-            </ul>
-            <div class="card-body decoration_card">
-              <a href="#" class="card-link btn btn-light">Todas las tareas</a>
-              <a href="{{'getUrl'}}{{e.href}}" class="card-link btn btn-warning">Ver curso</a>
-            </div>
-          </div> -->
+          
           
   
         {% endfor %}
   
-      {% endif %}
+      {% endif %} -->
+
+      <div class="card decoration_card" style="width: 18rem;">
+        <img src="../static/images/agente.png" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title ">{{e.texto}}</h5>
+          <p class="card-text">Recorderis: sadsadasd</p>
+        </div>
+        <ul class="list-group list-group-flush ">
+          <li class="list-group-item">4. ALEX FERNANDO LOPEZ: <a data-bs-toggle="modal" data-bs-target="#exampleModal" href="" data-tarea-id="480296055" data-info="{&quot;profesor&quot;: &quot;ALEX FERNANDO LOPEZ&quot;, &quot;materia&quot;: &quot;AMBIENTAL Y SST&quot;}">Actividad 9. Verificación y reporte condiciones inseguras, reporte de actos inseguros e incidentes: Actividad 9. Verificación y reporte condiciones inseguras, reporte de actos inseguros e incidentes</a></li>
+          <li class="list-group-item">5. ALEX FERNANDO LOPEZ: <a data-bs-toggle="modal" data-bs-target="#exampleModal" href="" data-tarea-id="480295550" data-info="{&quot;profesor&quot;: &quot;ALEX FERNANDO LOPEZ&quot;, &quot;materia&quot;: &quot;AMBIENTAL Y SST&quot;}">Actividad 8. Taller peligros y riesgos: Actividad 8. Taller peligros y riesgos</a></li>
+          <li class="list-group-item">6. ALEX FERNANDO LOPEZ: <a data-bs-toggle="modal" data-bs-target="#exampleModal" href="" data-tarea-id="480294715" data-info="{&quot;profesor&quot;: &quot;ALEX FERNANDO LOPEZ&quot;, &quot;materia&quot;: &quot;AMBIENTAL Y SST&quot;}">Actividad 7. Taller conceptos epidemiológicos: Actividad 7. Taller conceptos epidemiológicos</a></li>
+        </ul>
+        <div class="card-body decoration_card">
+          <a href="#" class="card-link btn btn-light">Todas las tareas</a>
+          <a href="{{'getUrl'}}{{e.href}}" class="card-link btn btn-warning">Ver curso</a>
+        </div>
+      </div>
     </div>
 
 
@@ -119,6 +121,16 @@
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="#">Después</a></li>
             </ul>
+          </div>
+
+          <div class="alert alert-success" role="alert" style="display: none;" id="alertSuccess">
+            <h4 class="alert-heading">¡Listo!👌​​</h4>
+            <p>El archivo ha sido enviado</p>
+          </div>
+        
+          <div class="alert alert-danger" role="alert" style="display: none;" id="alertDecline">
+            <h4 class="alert-heading">Error 🤷‍♂️​</h4>
+            <p>No se pudo entregar el archivo</p>
           </div>
 
         <!-- PAPER END -->  

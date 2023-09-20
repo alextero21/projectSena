@@ -6,49 +6,15 @@ $(document).ready(function () {
   // Oculta elementos <li> después del número máximo de elementos visibles
   
 
-  var url = '/probar';
+  var url = '/evidence';
   let pausar = false; // Inicialmente, el proceso está activo
   let evidenceIndex; // Índice para recorrer las evidencias
   let id_carrer;
   let maxVisibleItems = 5; // Cambia este valor al número deseado de elementos visibles
-  let intoSendFile=false; 
   var csrfToken = $('[name=csrfmiddlewaretoken]').val();
-
   let careers;
-  let eventClic=false;
-  var obkect={
-    "id_career": "2776992",
-    "id_tareas": [
-        "487906363",
-        "483078840",
-        "480296055",
-        "480295550",
-        "480294715",
-        "480293470",
-        "480292600",
-        "480291910",
-        "480291090",
-        "479413805",
-        "478255920",
-        "476003090",
-        "474544426",
-        "472620361",
-        "471510651",
-        "470634816",
-        "469578921",
-        "468648314",
-        "467677029",
-        "464688279",
-        "459774401",
-        "456193106",
-        "452513904"
-    ],
-    "status": 200
-  }
 
-  
-
-  function showEvidence(data,i){
+  function showEvidenceInHTML(data,i){
     
     var content = ``
     
@@ -71,7 +37,7 @@ $(document).ready(function () {
   }
 
   async function sendFiles() {//Envía las respuesta de imagenes, o vinculo para luego ser enviada al profesor
-
+    
     var fileList = $("#file")[0].files;
     var selectedFiles = [];
     for (var i = 0; i < fileList.length; i++) {
@@ -83,20 +49,23 @@ $(document).ready(function () {
 
     tareaIds=$("#tarea_id").val()
     var formData = new FormData();
+    
   
-    if (selectedFiles.length > 0) {
-      for (var i = 0; i < selectedFiles.length; i++) {
-        formData.append("files[]", selectedFiles[i]);
+    if(fileList.length>0){
+      if (selectedFiles.length > 0) {
+        for (var i = 0; i < selectedFiles.length; i++) {
+          formData.append("files[]", selectedFiles[i]);
+        }
+      }else if(selectedFiles.length == 0){
+        formData.append("files[]", selectedFiles[0]);
       }
-    }else if(selectedFiles.length == 0){
-      formData.append("files[]", selectedFiles[0]);
     }
+    
   
     formData.append("vinculo",url_vinculo)
     formData.append("tarea_id",tareaIds)
     
-    console.log(careers);
-
+    console.log('careers');
     try {
   
       const findPost=await $.ajax({
@@ -113,25 +82,14 @@ $(document).ready(function () {
 
       if(findPost){
         //Cuando se termine el proceso de poner los datos en evidencias, se reanuda el proceso de ir buscando post por post
-
-          pausar=false
-          Get3(careers,evidenceIndex+1)
-
-          
-          
-
-          // const ideas= await $.ajax({
-          //   url: "/probando",
-          //   type: "POST",
-          //   data: formData,
-          //   contentType: false,
-          //   processData: false,
-          //   beforeSend: function (xhr) {
-          //     // Agregar el token CSRF a la cabecera de la solicitud
-          //     xhr.setRequestHeader('X-CSRFToken', csrfToken);
-            
-          // }})
-          // console.log(ideas);
+          if(findPost.status === 200){
+            $('#alertSuccess').show()
+          }else{
+            $('#alertDecline').show()
+          }
+          // pausar=false
+          // GetEvidenceById(careers,evidenceIndex+1)
+        
       }
 
       
@@ -145,7 +103,7 @@ $(document).ready(function () {
   
   }
   
-  async function Get1() {//Obtiene todos los programas o carreras de la cuenta SENA
+  async function GetCarrer() {//Obtiene todos los programas o carreras de la cuenta SENA
 
     try {
 
@@ -209,7 +167,7 @@ $(document).ready(function () {
             console.log(maxVisibleItems);
           });
 
-          Get2(id_carrer)
+          GetAllNumberPosts(id_carrer)
           
         }
 
@@ -223,7 +181,7 @@ $(document).ready(function () {
 
   }
 
-  async function Get2(id_carrer){//Obtiene todos los numeros POST del curso o carrera, buscando cada evidencia para luego ser agregados en un tag ul
+  async function GetAllNumberPosts(id_carrer){//Obtiene todos los numeros POST del curso o carrera, buscando cada evidencia para luego ser agregados en un tag ul
 
     //Aqui inicia la ultima solicitud, que es para rellenar dato por dato de evidencias
     try {
@@ -239,7 +197,7 @@ $(document).ready(function () {
           }
         });
         careers=career_numbers
-        Get3(career_numbers,0)
+        GetEvidenceById(career_numbers,0)
 
     } catch (error) {
       console.log("Error en la solicitud AJAX 3:"+ error.message);
@@ -247,7 +205,7 @@ $(document).ready(function () {
  
   }
 
-  async function Get3(career_numbers,index){
+  async function GetEvidenceById(career_numbers,index){
 
     if (career_numbers.id_tareas) {
       totalEvidenceIndex=career_numbers.id_tareas.length
@@ -276,7 +234,7 @@ $(document).ready(function () {
                 var ulCarrer = $('ul[data-career-id="' + evidence.data_evidence[0].id_classroom + '"]');
                 if (ulCarrer.length > 0) {
                   // Crea un nuevo elemento <li> para la materia y agrega el texto
-                  var evidenceAppend=showEvidence(evidence.data_evidence[0],i+1)
+                  var evidenceAppend=showEvidenceInHTML(evidence.data_evidence[0],i+1)
     
                   // Agrega el <li> al <ul>
                   ulCarrer.append(evidenceAppend);
@@ -301,7 +259,6 @@ $(document).ready(function () {
 
             if (pausar) {
               sendFiles()
-              // eventClic=true;
             }       
             
           } catch (error) {
@@ -331,15 +288,16 @@ $(document).on("click", ".list-group-item a", function (e) {
  $(document).on("click", "#sendImage", async  function (e) {
     e.preventDefault();
 
-    //Cambia de estado la variable pausar, para el bucle de Get2()
-    pausar = true
+    //Cambia de estado la variable pausar, para el bucle de GetAllNumberPosts()
+    // pausar = true
+    sendFiles()
 
 });
 
 
 
 // Inicia el proceso cuando se carga la página, si no está pausado inicialmente
-  Get1();
+  // GetCarrer();
 
 
 
